@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Designer QR - Home Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#690005",
+                        "on-secondary-fixed-variant": "#004f58",
+                        "primary-fixed": "#dee0ff",
+                        "tertiary-fixed-dim": "#cdbdff",
+                        "secondary-fixed": "#9cf0ff",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#642de6",
+                        "on-tertiary-container": "#d8cbff",
+                        "outline-variant": "#454652",
+                        "inverse-surface": "#e2e2e5",
+                        "tertiary-fixed": "#e8deff",
+                        "on-tertiary-fixed-variant": "#4f00d0",
+                        "on-tertiary-fixed": "#20005f",
+                        "outline": "#8f909e",
+                        "surface-tint": "#bbc3ff",
+                        "secondary": "#bdf4ff",
+                        "surface-container-lowest": "#0c0e10",
+                        "on-primary": "#001d93",
+                        "background": "#121416",
+                        "surface-container-highest": "#333537",
+                        "on-surface": "#e2e2e5",
+                        "on-secondary-container": "#00616d",
+                        "on-surface-variant": "#c5c5d4",
+                        "primary-container": "#2243ea",
+                        "primary": "#bbc3ff",
+                        "surface-container": "#1e2022",
+                        "surface-container-high": "#282a2c",
+                        "inverse-on-surface": "#2f3133",
+                        "secondary-fixed-dim": "#00daf3",
+                        "on-secondary": "#00363d",
+                        "on-primary-container": "#cacfff",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed-variant": "#002ccd",
+                        "on-primary-fixed": "#000f5d",
+                        "on-tertiary": "#370096",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#2848ee",
+                        "on-secondary-fixed": "#001f24",
+                        "secondary-container": "#00e3fd",
+                        "surface-dim": "#121416",
+                        "surface-bright": "#37393b",
+                        "surface-container-low": "#1a1c1e",
+                        "tertiary": "#cdbdff",
+                        "primary-fixed-dim": "#bbc3ff",
+                        "on-background": "#e2e2e5",
+                        "surface": "#121416",
+                        "surface-variant": "#333537"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #121416; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(51, 53, 55, 0.6); backdrop-filter: blur(24px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#121416] flex items-center justify-between px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<div class="bg-primary-container p-2 rounded-xl">
+<span class="material-symbols-outlined text-primary" data-icon="qr_code_2">qr_code_2</span>
+</div>
+<span class="text-xl font-black tracking-tighter text-[#bbc3ff] font-['Manrope']">Designer QR</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<nav class="flex items-center gap-6">
+<a class="text-[#bbc3ff] font-semibold text-sm tracking-wide" href="#">Home</a>
+<a class="text-[#c5c5d4] hover:text-[#bbc3ff] transition-colors text-sm tracking-wide" href="#">Studio</a>
+<a class="text-[#c5c5d4] hover:text-[#bbc3ff] transition-colors text-sm tracking-wide" href="#">Exports</a>
+</nav>
+<button class="bg-surface-container-high p-2 rounded-full text-on-surface-variant hover:bg-[#282a2c] transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-7xl mx-auto space-y-12">
+<!-- Hero / Create Section -->
+<section class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary-container to-secondary-container rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+<div class="relative bg-surface-container-low rounded-2xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+<div class="flex flex-col space-y-6 max-w-xl">
+<h1 class="text-4xl md:text-6xl font-['Manrope'] font-extrabold tracking-tight text-on-surface">
+                        Precision <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary-fixed-dim">Designer</span> QR
+                    </h1>
+<p class="text-on-surface-variant text-lg leading-relaxed">
+                        Transform static codes into architectural masterpieces. Leverage intentional asymmetry and tonal depth for your brand's digital gateway.
+                    </p>
+<div class="flex flex-wrap gap-4">
+<button class="flex items-center gap-3 bg-primary text-on-primary px-8 py-4 rounded-xl font-bold transition-transform active:scale-95 hover:shadow-lg hover:shadow-primary/20">
+<span class="material-symbols-outlined" data-icon="add_circle" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span>Create New</span>
+</button>
+<button class="flex items-center gap-3 bg-surface-variant/60 backdrop-blur-xl text-on-surface px-8 py-4 rounded-xl font-semibold border border-white/5 hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span>Magic Generate</span>
+</button>
+</div>
+</div>
+<div class="hidden lg:block w-64 h-64 relative">
+<div class="absolute inset-0 bg-primary/10 rounded-3xl rotate-6"></div>
+<div class="absolute inset-0 bg-secondary/10 rounded-3xl -rotate-3"></div>
+<div class="relative bg-surface-bright p-6 rounded-2xl shadow-2xl flex items-center justify-center">
+<img alt="Custom designer QR code with deep cyan accents and central brand logo" class="w-full h-full object-contain" data-alt="a minimalist designer qr code with rounded modules and a vibrant cyan gradient finish on a clean dark grey background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWJEoKhPvy76hnQ_tGGBzYLoNqyswHEw6RqGqx41OvZPAWaYqwhMaVKRNpsUXvp05Sdsg2pQN7mGpIopFg9AE0g_m-vidApBbSjqODIFFy74mh-OC3UWHCH7n_f2P_7sBsJnTqEjumigBqcqIeLXWPF_6HjzHys1-rDHNymxLDQMYRchFeeLrQ1cgYxhzz17K1FiIVhngztzdRbi8lsIUT7vKuRajF4ds3CqJYNDWMVVhEkOj2PAhVE2lRwNEfDSfbbM59qLD4fBY"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Templates Horizontal Scroll -->
+<section class="space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="text-2xl font-['Manrope'] font-bold text-on-surface">Quick Templates</h2>
+<button class="text-primary text-sm font-semibold flex items-center gap-1 hover:underline">
+                    View All <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="flex overflow-x-auto gap-4 pb-4 no-scrollbar">
+<!-- Template Cards -->
+<div class="flex-none w-64 bg-surface-container-high rounded-xl p-4 space-y-4 hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<div class="aspect-square bg-surface-container rounded-lg overflow-hidden flex items-center justify-center border border-white/5">
+<span class="material-symbols-outlined text-primary text-5xl opacity-40 group-hover:opacity-100 transition-opacity" data-icon="style">style</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">Editorial Minimal</h3>
+<p class="text-xs text-on-surface-variant">Clean lines, high contrast</p>
+</div>
+</div>
+<div class="flex-none w-64 bg-surface-container-high rounded-xl p-4 space-y-4 hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<div class="aspect-square bg-surface-container rounded-lg overflow-hidden flex items-center justify-center border border-white/5">
+<span class="material-symbols-outlined text-secondary-fixed-dim text-5xl opacity-40 group-hover:opacity-100 transition-opacity" data-icon="blur_on">blur_on</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">Liquid Gradient</h3>
+<p class="text-xs text-on-surface-variant">Soft edges, vibrant hues</p>
+</div>
+</div>
+<div class="flex-none w-64 bg-surface-container-high rounded-xl p-4 space-y-4 hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<div class="aspect-square bg-surface-container rounded-lg overflow-hidden flex items-center justify-center border border-white/5">
+<span class="material-symbols-outlined text-tertiary text-5xl opacity-40 group-hover:opacity-100 transition-opacity" data-icon="token">token</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">Brutalist Logo</h3>
+<p class="text-xs text-on-surface-variant">Blocky, bold structure</p>
+</div>
+</div>
+<div class="flex-none w-64 bg-surface-container-high rounded-xl p-4 space-y-4 hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<div class="aspect-square bg-surface-container rounded-lg overflow-hidden flex items-center justify-center border border-white/5">
+<span class="material-symbols-outlined text-on-surface-variant text-5xl opacity-40 group-hover:opacity-100 transition-opacity" data-icon="rounded_corner">rounded_corner</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">Modern Rounded</h3>
+<p class="text-xs text-on-surface-variant">Friendly, accessible dot pattern</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Designs Bento Grid -->
+<section class="space-y-6">
+<h2 class="text-2xl font-['Manrope'] font-bold text-on-surface">Recent Designs</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Design Card 1 -->
+<div class="bg-surface-container-low rounded-2xl overflow-hidden group">
+<div class="aspect-video bg-surface-bright relative flex items-center justify-center p-8">
+<img alt="Abstract background" class="absolute inset-0 w-full h-full object-cover opacity-20 grayscale" data-alt="close-up of a high-tech glass surface with digital projections and deep indigo glowing lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1apqkzl16ajQ0kKcVpAQm3E1tmFHSDiiP4R_4Y2BpkcHaf4NESBOfhJXrqXJjF0x_ZTbdC5kpsqcgGEdk1Vbu-QmVrpQ1v9_nMZJLGpd0dBc6BZoJ6n49pXjKkFo-Vwxgt2OssavZQ48XM6fiuPIQdXICfOosStZiTmmO-aHbzK4nhTqkQlQG7awZl5-R8LbT_h2fSeRKdxjFk_-hASkEyI9H1rHX2Wjnc-ePuPIMJMFR7f5DZenVGXjlm17iDVklAAAEDF6SFvk"/>
+<div class="relative w-32 h-32 bg-white p-2 rounded-lg shadow-xl transform group-hover:scale-110 transition-transform duration-500">
+<span class="material-symbols-outlined text-black text-6xl block w-full text-center" data-icon="qr_code_2">qr_code_2</span>
+</div>
+</div>
+<div class="p-6 flex items-center justify-between">
+<div>
+<h4 class="font-bold text-on-surface">Coffee Shop Menu</h4>
+<p class="text-sm text-on-surface-variant">Edited 2h ago • 1.2k scans</p>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Design Card 2 -->
+<div class="bg-surface-container-low rounded-2xl overflow-hidden group">
+<div class="aspect-video bg-gradient-to-br from-[#121416] to-[#2243ea]/30 relative flex items-center justify-center p-8">
+<div class="relative w-32 h-32 bg-[#bbc3ff] p-2 rounded-xl shadow-xl transform group-hover:-rotate-3 transition-transform duration-500">
+<span class="material-symbols-outlined text-[#001d93] text-6xl block w-full text-center" data-icon="qr_code_2">qr_code_2</span>
+</div>
+</div>
+<div class="p-6 flex items-center justify-between">
+<div>
+<h4 class="font-bold text-on-surface">Portfoilio Link</h4>
+<p class="text-sm text-on-surface-variant">Edited yesterday • 458 scans</p>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Design Card 3 -->
+<div class="bg-surface-container-low rounded-2xl overflow-hidden group lg:col-span-1">
+<div class="aspect-video bg-surface-container-highest relative flex items-center justify-center p-8">
+<div class="absolute inset-0 bg-[#00e3fd]/5"></div>
+<div class="relative w-32 h-32 border-4 border-[#00daf3] p-2 rounded-2xl shadow-[0_0_20px_rgba(0,218,243,0.3)] transform group-hover:scale-105 transition-transform duration-500">
+<span class="material-symbols-outlined text-[#00daf3] text-6xl block w-full text-center" data-icon="qr_code_scanner">qr_code_scanner</span>
+</div>
+</div>
+<div class="p-6 flex items-center justify-between">
+<div>
+<h4 class="font-bold text-on-surface">Event Ticketing</h4>
+<p class="text-sm text-on-surface-variant">Created 3 days ago • 89 scans</p>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#121416]/80 backdrop-blur-3xl z-50 rounded-t-[1rem] shadow-[0_-20px_40px_rgba(0,0,0,0.4)]">
+<a class="flex flex-col items-center justify-center text-[#00daf3] bg-[#00e3fd]/10 rounded-full px-4 py-1 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#c5c5d4] hover:text-[#bbc3ff] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest mt-1">Create</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#c5c5d4] hover:text-[#bbc3ff] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="brush">brush</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest mt-1">Studio</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#c5c5d4] hover:text-[#bbc3ff] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest mt-1">Export</span>
+</a>
+</nav>
+</body></html>

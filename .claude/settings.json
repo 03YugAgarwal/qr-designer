@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)",
+      "Bash(npx expo:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(node -e \"const q = require\\('qrcode'\\); const r = q.create\\('test',{errorCorrectionLevel:'M'}\\); console.log\\('matrix size:', r.modules.size, 'data length:', r.modules.data.length\\)\")",
+      "Bash(node -e ':*)",
+      "Bash(ls node_modules/expo-camera/build/ExpoCamera*)",
+      "Bash(npm ci:*)",
+      "Bash(npm view:*)",
+      "Bash(npm --version)"
+    ]
+  }
+}

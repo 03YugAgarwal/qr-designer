@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Plus_Jakarta_Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#690005",
+                        "on-secondary-fixed-variant": "#004f58",
+                        "primary-fixed": "#dee0ff",
+                        "tertiary-fixed-dim": "#cdbdff",
+                        "secondary-fixed": "#9cf0ff",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#642de6",
+                        "on-tertiary-container": "#d8cbff",
+                        "outline-variant": "#454652",
+                        "inverse-surface": "#e2e2e5",
+                        "tertiary-fixed": "#e8deff",
+                        "on-tertiary-fixed-variant": "#4f00d0",
+                        "on-tertiary-fixed": "#20005f",
+                        "outline": "#8f909e",
+                        "surface-tint": "#bbc3ff",
+                        "secondary": "#bdf4ff",
+                        "surface-container-lowest": "#0c0e10",
+                        "on-primary": "#001d93",
+                        "background": "#121416",
+                        "surface-container-highest": "#333537",
+                        "on-surface": "#e2e2e5",
+                        "on-secondary-container": "#00616d",
+                        "on-surface-variant": "#c5c5d4",
+                        "primary-container": "#2243ea",
+                        "primary": "#bbc3ff",
+                        "surface-container": "#1e2022",
+                        "surface-container-high": "#282a2c",
+                        "inverse-on-surface": "#2f3133",
+                        "secondary-fixed-dim": "#00daf3",
+                        "on-secondary": "#00363d",
+                        "on-primary-container": "#cacfff",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed-variant": "#002ccd",
+                        "on-primary-fixed": "#000f5d",
+                        "on-tertiary": "#370096",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#2848ee",
+                        "on-secondary-fixed": "#001f24",
+                        "secondary-container": "#00e3fd",
+                        "surface-dim": "#121416",
+                        "surface-bright": "#37393b",
+                        "surface-container-low": "#1a1c1e",
+                        "tertiary": "#cdbdff",
+                        "primary-fixed-dim": "#bbc3ff",
+                        "on-background": "#e2e2e5",
+                        "surface": "#121416",
+                        "surface-variant": "#333537"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(51, 53, 55, 0.6);
+            backdrop-filter: blur(24px);
+        }
+        .signature-glow {
+            background: linear-gradient(135deg, rgba(34, 67, 234, 0.15), rgba(0, 227, 253, 0.15));
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body min-h-screen">
+<!-- Top Navigation -->
+<header class="fixed top-0 w-full z-50 bg-[#121416] flex items-center justify-between px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#bbc3ff] text-2xl" data-icon="qr_code_2">qr_code_2</span>
+<h1 class="font-headline font-black tracking-tighter text-[#bbc3ff] text-xl">Designer QR</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 text-on-surface-variant hover:bg-[#282a2c] px-3 py-1.5 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined text-lg" data-icon="undo">undo</span>
+</button>
+<button class="flex items-center gap-2 text-on-surface-variant hover:bg-[#282a2c] px-3 py-1.5 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined text-lg" data-icon="redo">redo</span>
+</button>
+<button class="bg-primary text-on-primary font-bold px-6 py-2 rounded-xl flex items-center gap-2 hover:opacity-90 transition-all scale-95 active:scale-100">
+<span class="material-symbols-outlined text-lg" data-icon="download">download</span>
+<span>Export</span>
+</button>
+</div>
+</header>
+<main class="pt-20 pb-32 min-h-screen flex flex-col md:flex-row gap-0 overflow-hidden">
+<!-- Top Half: QR Preview Canvas (Mobile) / Left Side (Desktop) -->
+<section class="flex-1 flex flex-col items-center justify-center p-8 bg-surface-container-low min-h-[442px] md:min-h-0">
+<div class="relative group">
+<div class="absolute -inset-8 bg-gradient-to-tr from-primary-container to-secondary-container opacity-10 blur-3xl rounded-full"></div>
+<div class="relative glass-panel p-10 rounded-[2rem] shadow-2xl border border-outline-variant/10">
+<div class="bg-surface-bright p-4 rounded-2xl aspect-square w-64 h-64 md:w-96 md:h-96 flex items-center justify-center">
+<!-- Mock QR Code Representation -->
+<div class="w-full h-full grid grid-cols-10 grid-rows-10 gap-1 opacity-90">
+<!-- Top Left Square -->
+<div class="col-start-1 col-end-4 row-start-1 row-end-4 bg-surface-container-lowest rounded-md"></div>
+<div class="col-start-1 col-end-4 row-start-7 row-end-10 bg-surface-container-lowest rounded-md"></div>
+<div class="col-start-7 col-end-10 row-start-1 row-end-4 bg-surface-container-lowest rounded-md"></div>
+<!-- Dot Pattern Mockup -->
+<div class="col-start-4 row-start-4 w-2 h-2 bg-secondary-container rounded-full self-center justify-self-center"></div>
+<div class="col-start-5 row-start-5 w-2 h-2 bg-secondary-container rounded-full self-center justify-self-center"></div>
+<div class="col-start-6 row-start-2 w-2 h-2 bg-secondary-container rounded-full self-center justify-self-center"></div>
+<div class="col-start-2 row-start-5 w-2 h-2 bg-secondary-container rounded-full self-center justify-self-center"></div>
+<div class="col-start-8 row-start-8 w-2 h-2 bg-secondary-container rounded-full self-center justify-self-center"></div>
+<div class="col-start-5 row-start-8 w-2 h-2 bg-secondary-container rounded-full self-center justify-self-center"></div>
+<div class="col-start-9 row-start-5 w-2 h-2 bg-secondary-container rounded-full self-center justify-self-center"></div>
+</div>
+</div>
+<!-- Status Badge -->
+<div class="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-surface-container-highest px-4 py-1.5 rounded-full border border-outline-variant/20 flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary-fixed-dim animate-pulse"></div>
+<span class="text-xs font-label font-semibold text-on-surface tracking-wide uppercase">Live Rendering</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Panel: Scrollable Tabbed Controls -->
+<section class="w-full md:w-[450px] bg-surface flex flex-col border-t md:border-t-0 md:border-l border-outline-variant/10 h-full">
+<!-- Tabs Header -->
+<nav class="flex items-center justify-between px-6 py-4 overflow-x-auto gap-8 no-scrollbar bg-surface-container-low/50">
+<button class="flex flex-col items-center gap-1 group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="add_photo_alternate">add_photo_alternate</span>
+<span class="font-label text-[10px] font-bold uppercase tracking-widest text-on-surface-variant group-hover:text-primary">Logo</span>
+</button>
+<button class="flex flex-col items-center gap-1 group">
+<span class="material-symbols-outlined text-primary" data-icon="palette">palette</span>
+<span class="font-label text-[10px] font-bold uppercase tracking-widest text-primary">Colors</span>
+</button>
+<button class="flex flex-col items-center gap-1 group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="category">category</span>
+<span class="font-label text-[10px] font-bold uppercase tracking-widest text-on-surface-variant group-hover:text-primary">Shapes</span>
+</button>
+<button class="flex flex-col items-center gap-1 group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors" data-icon="branding_watermark">branding_watermark</span>
+<span class="font-label text-[10px] font-bold uppercase tracking-widest text-on-surface-variant group-hover:text-primary">Frames</span>
+</button>
+</nav>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto px-6 py-8 space-y-10 custom-scrollbar">
+<!-- Tab Section: Colors -->
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<h2 class="font-headline font-bold text-lg text-on-surface">Color Palette</h2>
+<span class="text-xs text-on-surface-variant font-medium">Auto-contrast ON</span>
+</div>
+<!-- Picker Modules -->
+<div class="space-y-4">
+<div class="bg-surface-container-high p-4 rounded-xl flex items-center justify-between group hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" data-icon="center_focus_strong">center_focus_strong</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Eye Centers</p>
+<p class="text-[11px] text-on-surface-variant">Inner square color</p>
+</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-secondary-fixed-dim ring-4 ring-outline-variant/10 cursor-pointer"></div>
+</div>
+<div class="bg-surface-container-high p-4 rounded-xl flex items-center justify-between group hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" data-icon="grid_view">grid_view</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Body Modules</p>
+<p class="text-[11px] text-on-surface-variant">Dot pattern color</p>
+</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-primary ring-4 ring-outline-variant/10 cursor-pointer"></div>
+</div>
+<div class="bg-surface-container-high p-4 rounded-xl flex items-center justify-between group hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" data-icon="wallpaper">wallpaper</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Background</p>
+<p class="text-[11px] text-on-surface-variant">Canvas background</p>
+</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-bright ring-4 ring-outline-variant/10 cursor-pointer"></div>
+</div>
+</div>
+</div>
+<!-- Tab Section: Shapes -->
+<div class="space-y-6">
+<h2 class="font-headline font-bold text-lg text-on-surface">Visual Geometry</h2>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-high aspect-square rounded-2xl p-4 flex flex-col items-center justify-center gap-3 ring-2 ring-primary">
+<div class="grid grid-cols-3 gap-1 opacity-60">
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+</div>
+<span class="font-label text-[11px] font-bold uppercase tracking-wider text-primary">Soft Round</span>
+</div>
+<div class="bg-surface-container-high aspect-square rounded-2xl p-4 flex flex-col items-center justify-center gap-3 border border-outline-variant/10 hover:bg-surface-container-highest transition-all">
+<div class="grid grid-cols-3 gap-1 opacity-30">
+<div class="w-2 h-2 bg-on-surface rounded-none"></div>
+<div class="w-2 h-2 bg-on-surface rounded-none"></div>
+<div class="w-2 h-2 bg-on-surface rounded-none"></div>
+<div class="w-2 h-2 bg-on-surface rounded-none"></div>
+<div class="w-2 h-2 bg-on-surface rounded-none"></div>
+<div class="w-2 h-2 bg-on-surface rounded-none"></div>
+</div>
+<span class="font-label text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Classic Pixel</span>
+</div>
+</div>
+</div>
+<!-- Logo Upload (Mock) -->
+<div class="p-6 rounded-3xl signature-glow border border-secondary/10 flex flex-col items-center text-center gap-4">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center border border-outline-variant/30">
+<span class="material-symbols-outlined text-secondary text-3xl" data-icon="cloud_upload">cloud_upload</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Embed Brand Logo</p>
+<p class="text-xs text-on-surface-variant mt-1">Upload SVG or PNG for high precision</p>
+</div>
+<button class="w-full bg-surface-container-highest text-secondary text-sm font-bold py-3 rounded-xl border border-secondary/20 hover:bg-secondary/10 transition-colors">
+                        Select File
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#121416]/80 backdrop-blur-3xl z-50 rounded-t-[1rem] shadow-[0_-20px_40px_rgba(0,0,0,0.4)]">
+<a class="flex flex-col items-center justify-center text-[#c5c5d4] hover:text-[#bbc3ff] transition-all scale-90 active:scale-100 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#c5c5d4] hover:text-[#bbc3ff] transition-all scale-90 active:scale-100 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest mt-1">Create</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#00daf3] bg-[#00e3fd]/10 rounded-full px-4 py-1 transition-all scale-90 active:scale-100 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="brush">brush</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest mt-1">Studio</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#c5c5d4] hover:text-[#bbc3ff] transition-all scale-90 active:scale-100 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest mt-1">Export</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&amp;family=Plus_Jakarta_Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "on-error": "#690005",
+                  "on-secondary-fixed-variant": "#004f58",
+                  "primary-fixed": "#dee0ff",
+                  "tertiary-fixed-dim": "#cdbdff",
+                  "secondary-fixed": "#9cf0ff",
+                  "on-error-container": "#ffdad6",
+                  "tertiary-container": "#642de6",
+                  "on-tertiary-container": "#d8cbff",
+                  "outline-variant": "#454652",
+                  "inverse-surface": "#e2e2e5",
+                  "tertiary-fixed": "#e8deff",
+                  "on-tertiary-fixed-variant": "#4f00d0",
+                  "on-tertiary-fixed": "#20005f",
+                  "outline": "#8f909e",
+                  "surface-tint": "#bbc3ff",
+                  "secondary": "#bdf4ff",
+                  "surface-container-lowest": "#0c0e10",
+                  "on-primary": "#001d93",
+                  "background": "#121416",
+                  "surface-container-highest": "#333537",
+                  "on-surface": "#e2e2e5",
+                  "on-secondary-container": "#00616d",
+                  "on-surface-variant": "#c5c5d4",
+                  "primary-container": "#2243ea",
+                  "primary": "#bbc3ff",
+                  "surface-container": "#1e2022",
+                  "surface-container-high": "#282a2c",
+                  "inverse-on-surface": "#2f3133",
+                  "secondary-fixed-dim": "#00daf3",
+                  "on-secondary": "#00363d",
+                  "on-primary-container": "#cacfff",
+                  "error": "#ffb4ab",
+                  "on-primary-fixed-variant": "#002ccd",
+                  "on-primary-fixed": "#000f5d",
+                  "on-tertiary": "#370096",
+                  "error-container": "#93000a",
+                  "inverse-primary": "#2848ee",
+                  "on-secondary-fixed": "#001f24",
+                  "secondary-container": "#00e3fd",
+                  "surface-dim": "#121416",
+                  "surface-bright": "#37393b",
+                  "surface-container-low": "#1a1c1e",
+                  "tertiary": "#cdbdff",
+                  "primary-fixed-dim": "#bbc3ff",
+                  "on-background": "#e2e2e5",
+                  "surface": "#121416",
+                  "surface-variant": "#333537"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "fontFamily": {
+                  "headline": ["Manrope"],
+                  "body": ["Plus Jakarta Sans"],
+                  "label": ["Plus Jakarta Sans"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-panel {
+      background: rgba(51, 53, 55, 0.6);
+      backdrop-filter: blur(24px);
+    }
+    .signature-gradient {
+      background: linear-gradient(135deg, rgba(34, 67, 234, 0.15) 0%, rgba(0, 227, 253, 0.15) 100%);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#121416] dark:bg-[#121416]">
+<div class="flex items-center justify-between px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#bbc3ff]" data-icon="qr_code_2">qr_code_2</span>
+<h1 class="font-['Manrope'] font-bold tracking-tight text-xl font-black tracking-tighter text-[#bbc3ff]">Designer QR</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-[#282a2c] transition-colors text-[#c5c5d4]">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto space-y-10">
+<!-- Hero Header -->
+<section class="space-y-2">
+<h2 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface">Start Creating</h2>
+<p class="font-body text-on-surface-variant text-lg">Define your content and choose a visual base.</p>
+</section>
+<!-- Input Section -->
+<section class="space-y-6">
+<div class="space-y-4">
+<label class="font-label text-sm font-semibold uppercase tracking-widest text-on-surface-variant">Enter URL or Text</label>
+<div class="relative group">
+<input class="w-full bg-surface-container-highest border-none rounded-xl px-6 py-5 text-on-surface focus:ring-2 focus:ring-secondary/20 transition-all placeholder:text-outline outline-none" placeholder="https://your-creative-work.com" type="text"/>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
+<button class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="content_paste">content_paste</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Quick Type Selection -->
+<div class="grid grid-cols-3 gap-4">
+<button class="flex flex-col items-center justify-center p-6 rounded-xl bg-surface-container-high hover:bg-surface-container-highest transition-all group scale-95 active:scale-100 border border-outline-variant/15">
+<span class="material-symbols-outlined text-secondary-fixed-dim mb-3 text-3xl" data-icon="language">language</span>
+<span class="font-label text-xs font-bold uppercase tracking-tighter">Web</span>
+</button>
+<button class="flex flex-col items-center justify-center p-6 rounded-xl bg-surface-container-high hover:bg-surface-container-highest transition-all group scale-95 active:scale-100 border border-outline-variant/15">
+<span class="material-symbols-outlined text-secondary-fixed-dim mb-3 text-3xl" data-icon="wifi">wifi</span>
+<span class="font-label text-xs font-bold uppercase tracking-tighter">Wi-Fi</span>
+</button>
+<button class="flex flex-col items-center justify-center p-6 rounded-xl bg-surface-container-high hover:bg-surface-container-highest transition-all group scale-95 active:scale-100 border border-outline-variant/15">
+<span class="material-symbols-outlined text-secondary-fixed-dim mb-3 text-3xl" data-icon="contact_page">contact_page</span>
+<span class="font-label text-xs font-bold uppercase tracking-tighter">Contact</span>
+</button>
+</div>
+</section>
+<!-- Template Grid Section -->
+<section class="space-y-6">
+<div class="flex justify-between items-end">
+<label class="font-label text-sm font-semibold uppercase tracking-widest text-on-surface-variant">Choose Base Template</label>
+<span class="text-xs text-primary-fixed-dim font-bold">8 Designs Available</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-2 gap-6">
+<!-- Template Card 1 -->
+<div class="group relative aspect-square rounded-xl overflow-hidden cursor-pointer border border-outline-variant/15 ring-2 ring-primary ring-offset-4 ring-offset-background">
+<div class="absolute inset-0 bg-surface-bright">
+<img class="w-full h-full object-cover" data-alt="Minimalist abstract QR code design with clean geometric shapes and monochromatic blue and white aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARqmk5CwxRdh-2leaOtc1UaI836qAafF_xfuaBiFLKSHCB-vjxk0m8JKFCiydYXRPCepaZ4Djt9mSksyFIjKebmP3oIILrfPlzIUQYm-5X9I5iOP0dvQns6a7K6PLnVghk3rkx76A2Kl81jirTN8-1l9ognbS5xGpZQPHxxmBTLUG_NgJvnQeXCvRMKD_WVoHfML8fklCA3JsLLv9IKBB4xBTLTpfa2unIa-0vY5b01WCEIsg4kaUhbbRQPbeBy0kpkvxYo4-439s"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent p-4 flex flex-col justify-end">
+<p class="font-bold text-sm">Minimalist Pro</p>
+<p class="text-[10px] text-on-surface-variant font-medium">Clean &amp; Sharp</p>
+</div>
+<div class="absolute top-3 right-3 bg-primary text-on-primary rounded-full p-1 shadow-lg">
+<span class="material-symbols-outlined text-sm" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<!-- Template Card 2 -->
+<div class="group relative aspect-square rounded-xl overflow-hidden cursor-pointer border border-outline-variant/15 hover:border-secondary transition-colors">
+<div class="absolute inset-0 bg-surface-bright">
+<img class="w-full h-full object-cover" data-alt="Vibrant fluid abstract background with flowing neon cyan and indigo swirls and high-contrast digital textures" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCy6lbYNc7mTKyEEDKh45pM65A5Mae3eBm63l0M4GGs-z1ehNxNmEgA0mX07MthUjpiwv3DdQWZ56EGIPjxhQMvyjIa969MEzmwQyWX0IGdZR8wtij1RWhwdDjAQctt4xy36-xHHOSB-4fVwN6tq-Le8OANLNWOTOSXW0v_QpjdBiC4L3Xo50eCIzuGWuhmI2djGpf24486Y1y_7sbGFBAI8u7ycYbozss4GU-_WUa-Dp7JScXrzegPoEeM9OcDulkNMlqx1DixMS0"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent p-4 flex flex-col justify-end">
+<p class="font-bold text-sm">Cyber Fluid</p>
+<p class="text-[10px] text-on-surface-variant font-medium">Neon &amp; Dynamic</p>
+</div>
+</div>
+<!-- Template Card 3 -->
+<div class="group relative aspect-square rounded-xl overflow-hidden cursor-pointer border border-outline-variant/15 hover:border-secondary transition-colors">
+<div class="absolute inset-0 bg-surface-bright">
+<img class="w-full h-full object-cover" data-alt="Brutalist graphic design pattern with bold black and white blocks and distorted digital typography accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtTY771x0DzxrR9_Wq1tNvNgWKFnccjus29U9Vbm9070-etrkzCwJDn62QlTyJvZ1dKXiARXQ93r9rxYo8lkkq97jyo5z3cPknmZDo00cfiXW_X41TyVawxI4vY0obtlKOx8e_9elZOBPtPCEtuOlI1EUEehs4i-7gPIrFWvIKov4yyfkoNJA7XT-x_2NHvtFuEbcYA4JrsnF3NKje1L-ZVVeCCQrqrUDAO1cr-bk4b8s7YR76AwL-o-v02S_-fHVmKHAIRBh4ADk"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent p-4 flex flex-col justify-end">
+<p class="font-bold text-sm">Editorial Bold</p>
+<p class="text-[10px] text-on-surface-variant font-medium">High Contrast</p>
+</div>
+</div>
+<!-- Template Card 4 -->
+<div class="group relative aspect-square rounded-xl overflow-hidden cursor-pointer border border-outline-variant/15 hover:border-secondary transition-colors">
+<div class="absolute inset-0 bg-surface-bright">
+<img class="w-full h-full object-cover" data-alt="Soft hazy gradient from deep royal blue to bright cyan with grainy film texture and ethereal lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_KSxVKU6_RBE5vPoA5slrjM6YLfgCVOGam0X8WxzrcPH-Kfzr_6UaaWwbsXD0qh25ZS702CM5Te6t1ovl5AEM7XHdYJRi_7_nxoczOeFk-uwFJoaAEw1Kxv95EF5hBZcfuUsEMQdSWUH_7kYFVW2IfT1iLioX3MuY0ChDsoHc1oJ_1a6bzb_2D_Md9yLS9cNzdfyydhXNZEUeDk2vWSRfKMsJjg8-REYtbV4WHZeKgFAVjc9tKpfD8HrHac0wAw7WY4uwRfgNf0I"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent p-4 flex flex-col justify-end">
+<p class="font-bold text-sm">Soft Focus</p>
+<p class="text-[10px] text-on-surface-variant font-medium">Subtle &amp; Airy</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Navigation Footer (Fixed) -->
+<div class="fixed bottom-32 left-0 w-full px-6 flex justify-center pointer-events-none">
+<button class="pointer-events-auto group flex items-center gap-4 bg-primary text-on-primary font-headline font-extrabold px-10 py-5 rounded-full shadow-[0_20px_40px_rgba(34,67,234,0.3)] hover:scale-105 active:scale-95 transition-all">
+        Continue to Studio
+        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-[#121416]/80 backdrop-blur-3xl shadow-[0_-20px_40px_rgba(0,0,0,0.4)] z-50 rounded-t-[1rem]">
+<!-- Home Tab -->
+<div class="flex flex-col items-center justify-center text-[#c5c5d4] hover:text-[#bbc3ff] transition-all cursor-pointer">
+<span class="material-symbols-outlined mb-1" data-icon="dashboard">dashboard</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest">Home</span>
+</div>
+<!-- Create Tab (Active) -->
+<div class="flex flex-col items-center justify-center text-[#00daf3] bg-[#00e3fd]/10 rounded-full px-4 py-1 cursor-pointer">
+<span class="material-symbols-outlined mb-1" data-icon="add_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest">Create</span>
+</div>
+<!-- Studio Tab -->
+<div class="flex flex-col items-center justify-center text-[#c5c5d4] hover:text-[#bbc3ff] transition-all cursor-pointer">
+<span class="material-symbols-outlined mb-1" data-icon="brush">brush</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest">Studio</span>
+</div>
+<!-- Export Tab -->
+<div class="flex flex-col items-center justify-center text-[#c5c5d4] hover:text-[#bbc3ff] transition-all cursor-pointer">
+<span class="material-symbols-outlined mb-1" data-icon="ios_share">ios_share</span>
+<span class="font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest">Export</span>
+</div>
+</nav>
+</body></html>

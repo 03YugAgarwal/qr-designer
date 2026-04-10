@@ -1,11 +1,58 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import '@/global.css';
-
 import { Platform } from 'react-native';
+
+// Indigo Prism Design System
+export const DS = {
+  // Surface hierarchy
+  surface: '#121416',
+  surfaceDim: '#121416',
+  surfaceBright: '#37393b',
+  surfaceContainerLowest: '#0c0e10',
+  surfaceContainerLow: '#1a1c1e',
+  surfaceContainer: '#1e2022',
+  surfaceContainerHigh: '#282a2c',
+  surfaceContainerHighest: '#333537',
+  surfaceVariant: '#333537',
+
+  // Primary
+  primary: '#bbc3ff',
+  primaryContainer: '#2243ea',
+  onPrimary: '#001d93',
+  onPrimaryContainer: '#cacfff',
+  primaryFixed: '#dee0ff',
+  primaryFixedDim: '#bbc3ff',
+
+  // Secondary
+  secondary: '#bdf4ff',
+  secondaryContainer: '#00e3fd',
+  secondaryFixedDim: '#00daf3',
+  onSecondary: '#00363d',
+  onSecondaryContainer: '#00616d',
+
+  // Tertiary
+  tertiary: '#cdbdff',
+  tertiaryContainer: '#642de6',
+  onTertiary: '#370096',
+
+  // Error
+  error: '#ffb4ab',
+  errorContainer: '#93000a',
+
+  // On-surface
+  onSurface: '#e2e2e5',
+  onSurfaceVariant: '#c5c5d4',
+  onBackground: '#e2e2e5',
+  background: '#121416',
+
+  // Outline
+  outline: '#8f909e',
+  outlineVariant: '#454652',
+
+  // Inverse
+  inverseSurface: '#e2e2e5',
+  inverseOnSurface: '#2f3133',
+  inversePrimary: '#2848ee',
+} as const;
 
 export const Colors = {
   light: {
@@ -28,13 +75,9 @@ export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
