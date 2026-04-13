@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
 import { useQRDesign, type QRContentType, type TemplateId } from '@/context/qr-design-context';
-import { DS } from '@/constants/theme';
+import { useDS, type DSPalette } from '@/theme/theme-provider';
 
 const QR_TYPES: { key: QRContentType; label: string; icon: keyof typeof MaterialIcons.glyphMap }[] = [
   { key: 'web', label: 'Web', icon: 'language' },
@@ -29,6 +29,8 @@ const TEMPLATES: { id: TemplateId; name: string; desc: string }[] = [
 ];
 
 export default function CreateScreen() {
+  const ds = useDS();
+  const styles = useMemo(() => createStyles(ds), [ds]);
   const {
     content, setContent,
     contentType, setContentType,
@@ -79,7 +81,7 @@ export default function CreateScreen() {
               <MaterialIcons
                 name={type.icon}
                 size={26}
-                color={contentType === type.key ? DS.secondaryContainer : DS.secondaryFixedDim}
+                color={contentType === type.key ? ds.secondaryContainer : ds.secondaryFixedDim}
               />
               <Text style={[styles.typeLabel, contentType === type.key && styles.typeLabelActive]}>
                 {type.label}
@@ -99,7 +101,7 @@ export default function CreateScreen() {
                 <TextInput
                   style={[styles.input, contentType === 'text' && { minHeight: 100, textAlignVertical: 'top' }]}
                   placeholder={contentType === 'web' ? 'https://your-creative-work.com' : 'Enter any text...'}
-                  placeholderTextColor={DS.outline}
+                  placeholderTextColor={ds.outline}
                   value={content}
                   onChangeText={setContent}
                   autoCapitalize="none"
@@ -107,7 +109,7 @@ export default function CreateScreen() {
                   multiline={contentType === 'text'}
                 />
                 <Pressable style={styles.pasteBtn} onPress={handlePaste}>
-                  <MaterialIcons name="content-paste" size={20} color={DS.primary} />
+                  <MaterialIcons name="content-paste" size={20} color={ds.primary} />
                 </Pressable>
               </View>
             </>
@@ -119,14 +121,14 @@ export default function CreateScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Network Name (SSID)"
-                placeholderTextColor={DS.outline}
+                placeholderTextColor={ds.outline}
                 value={wifiData.ssid}
                 onChangeText={(t) => setWifiData({ ssid: t })}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Password"
-                placeholderTextColor={DS.outline}
+                placeholderTextColor={ds.outline}
                 value={wifiData.password}
                 onChangeText={(t) => setWifiData({ password: t })}
                 secureTextEntry
@@ -152,14 +154,14 @@ export default function CreateScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Full Name"
-                placeholderTextColor={DS.outline}
+                placeholderTextColor={ds.outline}
                 value={contactData.name}
                 onChangeText={(t) => setContactData({ name: t })}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Phone Number"
-                placeholderTextColor={DS.outline}
+                placeholderTextColor={ds.outline}
                 value={contactData.phone}
                 onChangeText={(t) => setContactData({ phone: t })}
                 keyboardType="phone-pad"
@@ -167,7 +169,7 @@ export default function CreateScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Email Address"
-                placeholderTextColor={DS.outline}
+                placeholderTextColor={ds.outline}
                 value={contactData.email}
                 onChangeText={(t) => setContactData({ email: t })}
                 keyboardType="email-address"
@@ -187,7 +189,7 @@ export default function CreateScreen() {
                 style={[styles.templateCard, templateId === tpl.id && styles.templateCardSelected]}
                 onPress={() => applyTemplate(tpl.id)}>
                 <View style={styles.templatePreview}>
-                  <MaterialIcons name="qr-code-2" size={48} color={DS.onSurfaceVariant} style={{ opacity: 0.3 }} />
+                  <MaterialIcons name="qr-code-2" size={48} color={ds.onSurfaceVariant} style={{ opacity: 0.3 }} />
                 </View>
                 <View style={styles.templateOverlay}>
                   <Text style={styles.templateName}>{tpl.name}</Text>
@@ -195,7 +197,7 @@ export default function CreateScreen() {
                 </View>
                 {templateId === tpl.id && (
                   <View style={styles.checkBadge}>
-                    <MaterialIcons name="check" size={14} color={DS.onPrimary} />
+                    <MaterialIcons name="check" size={14} color={ds.onPrimary} />
                   </View>
                 )}
               </Pressable>
@@ -210,30 +212,30 @@ export default function CreateScreen() {
       <View style={styles.floatingBtnWrapper}>
         <Pressable style={[styles.continueBtn, !canContinue() && { opacity: 0.5 }]} onPress={handleContinue}>
           <Text style={styles.continueBtnText}>Continue to Studio</Text>
-          <MaterialIcons name="arrow-forward" size={20} color={DS.onPrimary} />
+          <MaterialIcons name="arrow-forward" size={20} color={ds.onPrimary} />
         </Pressable>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: DS.surface },
+function createStyles(ds: DSPalette) { return StyleSheet.create({
+  container: { flex: 1, backgroundColor: ds.surface },
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 32, gap: 24 },
   header: { gap: 6 },
-  title: { fontSize: 34, fontWeight: '800', color: DS.onSurface, letterSpacing: -0.5 },
-  subtitle: { fontSize: 16, color: DS.onSurfaceVariant, lineHeight: 22 },
+  title: { fontSize: 34, fontWeight: '800', color: ds.onSurface, letterSpacing: -0.5 },
+  subtitle: { fontSize: 16, color: ds.onSurfaceVariant, lineHeight: 22 },
   section: { gap: 14 },
-  label: { fontSize: 11, fontWeight: '700', color: DS.onSurfaceVariant, letterSpacing: 1.5, textTransform: 'uppercase' },
+  label: { fontSize: 11, fontWeight: '700', color: ds.onSurfaceVariant, letterSpacing: 1.5, textTransform: 'uppercase' },
   inputWrapper: { position: 'relative', flexDirection: 'row', alignItems: 'flex-start' },
   input: {
     flex: 1,
-    backgroundColor: DS.surfaceContainerHighest,
+    backgroundColor: ds.surfaceContainerHighest,
     borderRadius: 12,
     paddingHorizontal: 20,
     paddingVertical: 16,
     paddingRight: 48,
-    color: DS.onSurface,
+    color: ds.onSurface,
     fontSize: 15,
   },
   pasteBtn: { position: 'absolute', right: 12, top: 14, padding: 4 },
@@ -241,44 +243,44 @@ const styles = StyleSheet.create({
   typeCard: {
     flex: 1, alignItems: 'center', justifyContent: 'center',
     paddingVertical: 18, borderRadius: 12,
-    backgroundColor: DS.surfaceContainerHigh, gap: 6,
+    backgroundColor: ds.surfaceContainerHigh, gap: 6,
   },
-  typeCardActive: { backgroundColor: DS.surfaceContainerHighest, borderColor: DS.secondaryFixedDim, borderWidth: 1 },
-  typeLabel: { fontSize: 10, fontWeight: '700', color: DS.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.5 },
-  typeLabelActive: { color: DS.secondaryFixedDim },
+  typeCardActive: { backgroundColor: ds.surfaceContainerHighest, borderColor: ds.secondaryFixedDim, borderWidth: 1 },
+  typeLabel: { fontSize: 10, fontWeight: '700', color: ds.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.5 },
+  typeLabelActive: { color: ds.secondaryFixedDim },
   encRow: { flexDirection: 'row', gap: 10 },
   encChip: {
     paddingHorizontal: 20, paddingVertical: 10, borderRadius: 999,
-    backgroundColor: DS.surfaceContainerHigh,
+    backgroundColor: ds.surfaceContainerHigh,
   },
-  encChipActive: { backgroundColor: DS.secondaryContainer },
-  encText: { fontSize: 13, fontWeight: '600', color: DS.onSurfaceVariant },
-  encTextActive: { color: DS.onSecondaryContainer },
+  encChipActive: { backgroundColor: ds.secondaryContainer },
+  encText: { fontSize: 13, fontWeight: '600', color: ds.onSurfaceVariant },
+  encTextActive: { color: ds.onSecondaryContainer },
   templateGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
   templateCard: {
     width: '47%', aspectRatio: 1, borderRadius: 12, overflow: 'hidden',
-    backgroundColor: DS.surfaceBright, position: 'relative',
+    backgroundColor: ds.surfaceBright, position: 'relative',
   },
-  templateCardSelected: { borderWidth: 2, borderColor: DS.primary },
+  templateCardSelected: { borderWidth: 2, borderColor: ds.primary },
   templatePreview: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   templateOverlay: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     paddingHorizontal: 12, paddingVertical: 10,
     backgroundColor: 'rgba(18, 20, 22, 0.8)',
   },
-  templateName: { fontSize: 13, fontWeight: '700', color: DS.onSurface },
-  templateDesc: { fontSize: 10, color: DS.onSurfaceVariant, marginTop: 1 },
+  templateName: { fontSize: 13, fontWeight: '700', color: ds.onSurface },
+  templateDesc: { fontSize: 10, color: ds.onSurfaceVariant, marginTop: 1 },
   checkBadge: {
     position: 'absolute', top: 10, right: 10,
-    backgroundColor: DS.primary, width: 24, height: 24, borderRadius: 12,
+    backgroundColor: ds.primary, width: 24, height: 24, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center',
   },
   floatingBtnWrapper: { position: 'absolute', bottom: 16, left: 0, right: 0, alignItems: 'center' },
   continueBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: DS.primary, paddingHorizontal: 36, paddingVertical: 18, borderRadius: 999,
-    shadowColor: DS.primaryContainer, shadowOffset: { width: 0, height: 12 },
+    backgroundColor: ds.primary, paddingHorizontal: 36, paddingVertical: 18, borderRadius: 999,
+    shadowColor: ds.primaryContainer, shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.3, shadowRadius: 20, elevation: 8,
   },
-  continueBtnText: { color: DS.onPrimary, fontWeight: '800', fontSize: 16 },
-});
+  continueBtnText: { color: ds.onPrimary, fontWeight: '800', fontSize: 16 },
+}); }

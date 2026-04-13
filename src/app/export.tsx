@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -20,9 +20,13 @@ import { router } from 'expo-router';
 import CustomQRCode from '@/components/custom-qr';
 import { LogoOverlay } from '@/components/builtin-logos';
 import { useQRDesign } from '@/context/qr-design-context';
-import { DS } from '@/constants/theme';
+import { useDS, type DSPalette } from '@/theme/theme-provider';
+import { useT } from '@/i18n';
 
 export default function ExportScreen() {
+  const t = useT();
+  const ds = useDS();
+  const styles = useMemo(() => createStyles(ds), [ds]);
   const ctx = useQRDesign();
   const viewShotRef = useRef<ViewShot>(null);
   const [saving, setSaving] = useState(false);
@@ -35,7 +39,7 @@ export default function ExportScreen() {
       const uri = await viewShotRef.current?.capture?.();
       return uri ?? null;
     } catch {
-      Alert.alert('Error', 'Failed to capture QR code image.');
+      Alert.alert(t('common.error'), t('export.captureFailed'));
       return null;
     }
   }, []);
@@ -54,7 +58,7 @@ export default function ExportScreen() {
         Alert.alert('Saved', `QR code saved to ${destPath}`);
       }
     } catch (e: any) {
-      Alert.alert('Error', e.message || 'Failed to save.');
+      Alert.alert(t('common.error'), e.message || 'Failed to save.');
     }
     setSaving(false);
   }, [captureQR, ctx.designName]);
@@ -69,7 +73,7 @@ export default function ExportScreen() {
       await FileSystem.copyAsync({ from: uri, to: destPath });
       await Sharing.shareAsync(destPath, { mimeType: 'image/png' });
     } catch (e: any) {
-      Alert.alert('Error', e.message || 'Failed to share.');
+      Alert.alert(t('common.error'), e.message || 'Failed to share.');
     }
     setSaving(false);
   }, [captureQR]);
@@ -78,9 +82,9 @@ export default function ExportScreen() {
     setSaving(true);
     try {
       await ctx.saveCurrentDesign();
-      Alert.alert('Saved!', 'Design saved to your collection.');
+      Alert.alert(t('export.saved'));
     } catch (e: any) {
-      Alert.alert('Error', e.message || 'Failed to save.');
+      Alert.alert(t('common.error'), e.message || 'Failed to save.');
     }
     setSaving(false);
   }, [ctx.saveCurrentDesign]);
@@ -93,25 +97,25 @@ export default function ExportScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <Text style={styles.readyLabel}>Export Ready</Text>
-        <Text style={styles.title}>Design{'\n'}Finalized.</Text>
+        <Text style={styles.readyLabel}>{t('export.exportReady')}</Text>
+        <Text style={styles.title}>{t('export.finalized').replace('{br}', '\n')}</Text>
       </View>
 
       <View style={styles.nameRow}>
         <TextInput
           style={styles.nameInput}
-          placeholder="Untitled Design"
-          placeholderTextColor={DS.outline}
+          placeholder={t('export.untitled')}
+          placeholderTextColor={ds.outline}
           value={ctx.designName}
           onChangeText={ctx.setDesignName}
         />
-        <MaterialIcons name="edit" size={18} color={DS.onSurfaceVariant} />
+        <MaterialIcons name="edit" size={18} color={ds.onSurfaceVariant} />
       </View>
 
       {/* Capturable QR Preview */}
       <View style={styles.previewWrapper}>
         <LinearGradient
-          colors={[`${DS.primaryContainer}33`, `${DS.secondaryContainer}33`]}
+          colors={[`${ds.primaryContainer}33`, `${ds.secondaryContainer}33`]}
           start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
           style={styles.previewGlow}
         />
@@ -152,70 +156,70 @@ export default function ExportScreen() {
           </ViewShot>
           <View style={styles.previewMeta}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.previewName}>{ctx.designName || 'Untitled Design'}</Text>
-              <Text style={styles.previewDesc}>Static {qrValue.length > 30 ? 'URL' : 'Content'}</Text>
+              <Text style={styles.previewName}>{ctx.designName || t('export.untitled')}</Text>
+              <Text style={styles.previewDesc}>{qrValue.length > 30 ? t('export.staticUrl') : t('export.staticContent')}</Text>
             </View>
             <Pressable style={styles.refineBtn} onPress={() => router.push('/studio')}>
-              <MaterialIcons name="edit" size={18} color={DS.primary} />
-              <Text style={styles.refineText}>Refine</Text>
+              <MaterialIcons name="edit" size={18} color={ds.primary} />
+              <Text style={styles.refineText}>{t('export.refine')}</Text>
             </Pressable>
           </View>
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Download & Share</Text>
+        <Text style={styles.sectionLabel}>{t('export.downloadShare')}</Text>
         <View style={styles.downloadList}>
           <Pressable style={styles.downloadRow} onPress={handleDownloadPNG} disabled={saving}>
             <View style={styles.downloadLeft}>
-              <View style={[styles.downloadIcon, { backgroundColor: `${DS.primary}1A` }]}>
-                <MaterialIcons name="image" size={22} color={DS.primary} />
+              <View style={[styles.downloadIcon, { backgroundColor: `${ds.primary}1A` }]}>
+                <MaterialIcons name="image" size={22} color={ds.primary} />
               </View>
               <View>
-                <Text style={styles.downloadLabel}>Save as PNG</Text>
-                <Text style={styles.downloadDesc}>High-res image file</Text>
+                <Text style={styles.downloadLabel}>{t('export.savePng')}</Text>
+                <Text style={styles.downloadDesc}>{t('export.savePngDesc')}</Text>
               </View>
             </View>
-            {saving ? <ActivityIndicator size="small" color={DS.primary} /> : <MaterialIcons name="download" size={22} color={DS.onSurfaceVariant} />}
+            {saving ? <ActivityIndicator size="small" color={ds.primary} /> : <MaterialIcons name="download" size={22} color={ds.onSurfaceVariant} />}
           </Pressable>
           <Pressable style={styles.downloadRow} onPress={handleShare} disabled={saving}>
             <View style={styles.downloadLeft}>
-              <View style={[styles.downloadIcon, { backgroundColor: `${DS.secondary}1A` }]}>
-                <MaterialIcons name="share" size={22} color={DS.secondary} />
+              <View style={[styles.downloadIcon, { backgroundColor: `${ds.secondary}1A` }]}>
+                <MaterialIcons name="share" size={22} color={ds.secondary} />
               </View>
               <View>
-                <Text style={styles.downloadLabel}>Share</Text>
-                <Text style={styles.downloadDesc}>Send via any app</Text>
+                <Text style={styles.downloadLabel}>{t('common.share')}</Text>
+                <Text style={styles.downloadDesc}>{t('export.shareDesc')}</Text>
               </View>
             </View>
-            <MaterialIcons name="ios-share" size={22} color={DS.onSurfaceVariant} />
+            <MaterialIcons name="ios-share" size={22} color={ds.onSurfaceVariant} />
           </Pressable>
         </View>
       </View>
 
       <View style={styles.ctaSection}>
         <Pressable style={styles.saveBtn} onPress={handleSaveToCollection} disabled={saving}>
-          {saving ? <ActivityIndicator size="small" color={DS.onPrimary} /> : (
-            <><MaterialIcons name="bookmark" size={20} color={DS.onPrimary} /><Text style={styles.saveBtnText}>Save to Collection</Text></>
+          {saving ? <ActivityIndicator size="small" color={ds.onPrimary} /> : (
+            <><MaterialIcons name="bookmark" size={20} color={ds.onPrimary} /><Text style={styles.saveBtnText}>{t('export.saveCollection')}</Text></>
           )}
         </Pressable>
         <Pressable style={styles.newDesignBtn} onPress={handleCreateNew}>
-          <MaterialIcons name="add-box" size={20} color={DS.onSurfaceVariant} />
-          <Text style={styles.newDesignBtnText}>Create New Design</Text>
+          <MaterialIcons name="add-box" size={20} color={ds.onSurfaceVariant} />
+          <Text style={styles.newDesignBtnText}>{t('export.createNew')}</Text>
         </Pressable>
       </View>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: DS.surface },
+function createStyles(ds: DSPalette) { return StyleSheet.create({
+  container: { flex: 1, backgroundColor: ds.surface },
   content: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 40, gap: 24 },
   header: { gap: 6 },
-  readyLabel: { fontSize: 10, fontWeight: '700', color: DS.secondary, letterSpacing: 2, textTransform: 'uppercase' },
-  title: { fontSize: 38, fontWeight: '800', color: DS.onSurface, letterSpacing: -0.5, lineHeight: 42 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: DS.surfaceContainerHigh, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 4 },
-  nameInput: { flex: 1, color: DS.onSurface, fontSize: 16, fontWeight: '700', paddingVertical: 12 },
+  readyLabel: { fontSize: 10, fontWeight: '700', color: ds.secondary, letterSpacing: 2, textTransform: 'uppercase' },
+  title: { fontSize: 38, fontWeight: '800', color: ds.onSurface, letterSpacing: -0.5, lineHeight: 42 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: ds.surfaceContainerHigh, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 4 },
+  nameInput: { flex: 1, color: ds.onSurface, fontSize: 16, fontWeight: '700', paddingVertical: 12 },
   previewWrapper: { position: 'relative' },
   previewGlow: { position: 'absolute', top: -12, left: -12, right: -12, bottom: -12, borderRadius: 28, opacity: 0.5 },
   glassCard: { backgroundColor: 'rgba(51,53,55,0.6)', borderRadius: 16, padding: 20, gap: 20 },
@@ -225,21 +229,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   previewMeta: { flexDirection: 'row', alignItems: 'center' },
-  previewName: { fontSize: 16, fontWeight: '700', color: DS.onSurface },
-  previewDesc: { fontSize: 13, color: DS.onSurfaceVariant, marginTop: 2 },
+  previewName: { fontSize: 16, fontWeight: '700', color: ds.onSurface },
+  previewDesc: { fontSize: 13, color: ds.onSurfaceVariant, marginTop: 2 },
   refineBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  refineText: { fontSize: 13, fontWeight: '600', color: DS.primary },
+  refineText: { fontSize: 13, fontWeight: '600', color: ds.primary },
   section: { gap: 14 },
-  sectionLabel: { fontSize: 11, fontWeight: '700', color: DS.onSurfaceVariant, letterSpacing: 1.5, textTransform: 'uppercase' },
+  sectionLabel: { fontSize: 11, fontWeight: '700', color: ds.onSurfaceVariant, letterSpacing: 1.5, textTransform: 'uppercase' },
   downloadList: { gap: 10 },
-  downloadRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: DS.surfaceContainerHigh, borderRadius: 12, padding: 16 },
+  downloadRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: ds.surfaceContainerHigh, borderRadius: 12, padding: 16 },
   downloadLeft: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   downloadIcon: { width: 44, height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  downloadLabel: { fontSize: 15, fontWeight: '700', color: DS.onSurface },
-  downloadDesc: { fontSize: 12, color: DS.onSurfaceVariant, marginTop: 1 },
+  downloadLabel: { fontSize: 15, fontWeight: '700', color: ds.onSurface },
+  downloadDesc: { fontSize: 12, color: ds.onSurfaceVariant, marginTop: 1 },
   ctaSection: { gap: 10, marginTop: 4 },
-  saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: DS.primary, paddingVertical: 18, borderRadius: 12, elevation: 4 },
-  saveBtnText: { color: DS.onPrimary, fontWeight: '800', fontSize: 16 },
-  newDesignBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderWidth: 1, borderColor: `${DS.outlineVariant}4D`, paddingVertical: 18, borderRadius: 12 },
-  newDesignBtnText: { color: DS.onSurfaceVariant, fontWeight: '700', fontSize: 16 },
-});
+  saveBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: ds.primary, paddingVertical: 18, borderRadius: 12, elevation: 4 },
+  saveBtnText: { color: ds.onPrimary, fontWeight: '800', fontSize: 16 },
+  newDesignBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, borderWidth: 1, borderColor: `${ds.outlineVariant}4D`, paddingVertical: 18, borderRadius: 12 },
+  newDesignBtnText: { color: ds.onSurfaceVariant, fontWeight: '700', fontSize: 16 },
+}); }

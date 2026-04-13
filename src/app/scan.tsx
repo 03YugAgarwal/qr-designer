@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,15 @@ import {
   Alert,
   Dimensions,
   ScrollView,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { useQRDesign, type ScanHistoryEntry } from '@/context/qr-design-context';
-import { DS } from '@/constants/theme';
+import { useDS, type DSPalette } from '@/theme/theme-provider';
+import { useT } from '@/i18n';
 
 // --- Content type detection ---
 
@@ -122,10 +125,11 @@ function parseMeCard(data: string) {
   };
 }
 
-function detectContent(data: string): DetectedContent {
+type TFn = (key: string, fallback?: string) => string;
+
+function detectContent(data: string, ds: DSPalette, t: TFn): DetectedContent {
   const lower = data.toLowerCase();
 
-  // --- UPI Payment (Google Pay, PhonePe, Paytm) ---
   if (lower.startsWith('upi://')) {
     const url = new URL(data.replace('upi://', 'https://upi/'));
     const pa = url.searchParams.get('pa') || '';
@@ -133,369 +137,321 @@ function detectContent(data: string): DetectedContent {
     const am = url.searchParams.get('am') || '';
     return {
       kind: 'upi',
-      label: 'UPI Payment',
+      label: t('scan.kinds.upi'),
       icon: 'payments',
       iconColor: '#00c853',
       primaryAction: {
-        label: 'Pay with UPI App',
-        appName: 'Google Pay / PhonePe / Paytm',
-        onPress: () => tryOpen(data, 'No UPI payment app installed.'),
+        label: t('scan.actions.payUpi'),
+        appName: t('scan.appNames.upiApp'),
+        onPress: () => tryOpen(data, t('scan.appNames.noUpi')),
       },
       parsedFields: [
-        pn && { label: 'Payee', value: pn },
+        pn && { label: t('scan.kinds.mecard'), value: pn },
         pa && { label: 'UPI ID', value: pa },
         am && { label: 'Amount', value: `₹${am}` },
       ].filter(Boolean) as { label: string; value: string }[],
     };
   }
 
-  // --- Bitcoin / Crypto ---
   if (lower.startsWith('bitcoin:')) {
     return {
-      kind: 'bitcoin',
-      label: 'Bitcoin Address',
-      icon: 'currency-bitcoin',
-      iconColor: '#f7931a',
-      primaryAction: { label: 'Open in Wallet', appName: 'Bitcoin Wallet', onPress: () => tryOpen(data, 'No Bitcoin wallet app installed.') },
+      kind: 'bitcoin', label: t('scan.kinds.bitcoin'), icon: 'currency-bitcoin', iconColor: '#f7931a',
+      primaryAction: { label: t('scan.actions.openWallet'), appName: t('scan.appNames.btcWallet'), onPress: () => tryOpen(data, t('scan.appNames.noBtc')) },
     };
   }
   if (lower.startsWith('ethereum:')) {
     return {
-      kind: 'ethereum',
-      label: 'Ethereum Address',
-      icon: 'token',
-      iconColor: '#627eea',
-      primaryAction: { label: 'Open in Wallet', appName: 'Crypto Wallet', onPress: () => tryOpen(data, 'No crypto wallet app installed.') },
+      kind: 'ethereum', label: t('scan.kinds.ethereum'), icon: 'token', iconColor: '#627eea',
+      primaryAction: { label: t('scan.actions.openWallet'), appName: t('scan.appNames.cryptoWallet'), onPress: () => tryOpen(data, t('scan.appNames.noCrypto')) },
     };
   }
 
-  // --- PayPal ---
   if (lower.includes('paypal.me/') || lower.startsWith('paypal:')) {
     return {
-      kind: 'paypal',
-      label: 'PayPal Payment',
-      icon: 'payments',
-      iconColor: '#003087',
-      primaryAction: { label: 'Open in PayPal', appName: 'PayPal', onPress: () => tryOpen(data, 'PayPal app or browser not available.') },
+      kind: 'paypal', label: t('scan.kinds.paypal'), icon: 'payments', iconColor: '#003087',
+      primaryAction: { label: t('scan.actions.openPayPal'), appName: t('scan.appNames.paypal'), onPress: () => tryOpen(data, t('scan.appNames.noPaypal')) },
     };
   }
 
-  // --- WhatsApp ---
   if (lower.includes('wa.me/') || lower.startsWith('whatsapp:')) {
     return {
-      kind: 'whatsapp',
-      label: 'WhatsApp',
-      icon: 'chat',
-      iconColor: '#25d366',
-      primaryAction: { label: 'Open in WhatsApp', appName: 'WhatsApp', onPress: () => tryOpen(data, 'WhatsApp not installed.') },
+      kind: 'whatsapp', label: t('scan.kinds.whatsapp'), icon: 'chat', iconColor: '#25d366',
+      primaryAction: { label: t('scan.actions.openApp'), appName: t('scan.appNames.whatsapp'), onPress: () => tryOpen(data, t('scan.appNames.noWhatsapp')) },
     };
   }
 
-  // --- Instagram ---
   if (lower.includes('instagram.com/') || lower.startsWith('instagram:')) {
     return {
-      kind: 'instagram',
-      label: 'Instagram',
-      icon: 'camera-alt',
-      iconColor: '#e1306c',
-      primaryAction: { label: 'Open in Instagram', appName: 'Instagram', onPress: () => tryOpen(data, 'Instagram not installed.') },
+      kind: 'instagram', label: t('scan.kinds.instagram'), icon: 'camera-alt', iconColor: '#e1306c',
+      primaryAction: { label: t('scan.actions.openApp'), appName: t('scan.appNames.instagram'), onPress: () => tryOpen(data, t('scan.appNames.noInstagram')) },
     };
   }
 
-  // --- Twitter / X ---
   if (lower.includes('twitter.com/') || lower.includes('x.com/')) {
     return {
-      kind: 'twitter',
-      label: 'X (Twitter)',
-      icon: 'alternate-email',
-      iconColor: '#1da1f2',
-      primaryAction: { label: 'Open Profile', appName: 'X / Browser', onPress: () => tryOpen(data, 'Could not open link.') },
+      kind: 'twitter', label: t('scan.kinds.twitter'), icon: 'alternate-email', iconColor: '#1da1f2',
+      primaryAction: { label: t('scan.actions.openApp'), appName: t('scan.appNames.twitter'), onPress: () => tryOpen(data, t('scan.appNames.noTwitter')) },
     };
   }
 
-  // --- Facebook ---
   if (lower.includes('facebook.com/') || lower.includes('fb.com/')) {
     return {
-      kind: 'facebook',
-      label: 'Facebook',
-      icon: 'thumb-up',
-      iconColor: '#1877f2',
-      primaryAction: { label: 'Open in Facebook', appName: 'Facebook', onPress: () => tryOpen(data, 'Could not open link.') },
+      kind: 'facebook', label: t('scan.kinds.facebook'), icon: 'thumb-up', iconColor: '#1877f2',
+      primaryAction: { label: t('scan.actions.openApp'), appName: t('scan.appNames.facebook'), onPress: () => tryOpen(data, t('scan.appNames.noFacebook')) },
     };
   }
 
-  // --- LinkedIn ---
   if (lower.includes('linkedin.com/')) {
     return {
-      kind: 'linkedin',
-      label: 'LinkedIn',
-      icon: 'work',
-      iconColor: '#0a66c2',
-      primaryAction: { label: 'Open in LinkedIn', appName: 'LinkedIn', onPress: () => tryOpen(data, 'Could not open link.') },
+      kind: 'linkedin', label: t('scan.kinds.linkedin'), icon: 'work', iconColor: '#0a66c2',
+      primaryAction: { label: t('scan.actions.openApp'), appName: t('scan.appNames.linkedin'), onPress: () => tryOpen(data, t('scan.appNames.noLinkedin')) },
     };
   }
 
-  // --- Telegram ---
   if (lower.includes('t.me/') || lower.startsWith('tg:')) {
     return {
-      kind: 'telegram',
-      label: 'Telegram',
-      icon: 'send',
-      iconColor: '#0088cc',
-      primaryAction: { label: 'Open in Telegram', appName: 'Telegram', onPress: () => tryOpen(data, 'Telegram not installed.') },
+      kind: 'telegram', label: t('scan.kinds.telegram'), icon: 'send', iconColor: '#0088cc',
+      primaryAction: { label: t('scan.actions.openApp'), appName: t('scan.appNames.telegram'), onPress: () => tryOpen(data, t('scan.appNames.noTelegram')) },
     };
   }
 
-  // --- YouTube ---
   if (lower.includes('youtube.com/') || lower.includes('youtu.be/')) {
     return {
-      kind: 'youtube',
-      label: 'YouTube',
-      icon: 'play-circle-filled',
-      iconColor: '#ff0000',
-      primaryAction: { label: 'Open in YouTube', appName: 'YouTube', onPress: () => tryOpen(data, 'Could not open link.') },
+      kind: 'youtube', label: t('scan.kinds.youtube'), icon: 'play-circle-filled', iconColor: '#ff0000',
+      primaryAction: { label: t('scan.actions.openApp'), appName: t('scan.appNames.youtube'), onPress: () => tryOpen(data, t('scan.appNames.noYoutube')) },
     };
   }
 
-  // --- Spotify ---
   if (lower.startsWith('spotify:') || lower.includes('open.spotify.com/')) {
     return {
-      kind: 'spotify',
-      label: 'Spotify',
-      icon: 'music-note',
-      iconColor: '#1db954',
-      primaryAction: { label: 'Open in Spotify', appName: 'Spotify', onPress: () => tryOpen(data, 'Spotify not installed.') },
+      kind: 'spotify', label: t('scan.kinds.spotify'), icon: 'music-note', iconColor: '#1db954',
+      primaryAction: { label: t('scan.actions.openApp'), appName: t('scan.appNames.spotify'), onPress: () => tryOpen(data, t('scan.appNames.noSpotify')) },
     };
   }
 
-  // --- Play Store ---
   if (lower.startsWith('market://') || lower.includes('play.google.com/store/')) {
     return {
-      kind: 'playstore',
-      label: 'Play Store App',
-      icon: 'android',
-      iconColor: '#3ddc84',
-      primaryAction: { label: 'Open in Play Store', appName: 'Play Store', onPress: () => tryOpen(data, 'Could not open Play Store.') },
+      kind: 'playstore', label: t('scan.kinds.playstore'), icon: 'android', iconColor: '#3ddc84',
+      primaryAction: { label: t('scan.actions.openPlayStore'), appName: t('scan.appNames.playstore'), onPress: () => tryOpen(data, t('scan.appNames.noPlayStore')) },
     };
   }
 
-  // --- App Store ---
   if (lower.startsWith('itms-apps:') || lower.includes('apps.apple.com/')) {
     return {
-      kind: 'appstore',
-      label: 'App Store App',
-      icon: 'apple',
-      iconColor: '#a2aaad',
-      primaryAction: { label: 'Open in App Store', appName: 'App Store', onPress: () => tryOpen(data, 'Could not open App Store.') },
+      kind: 'appstore', label: t('scan.kinds.appstore'), icon: 'apple', iconColor: '#a2aaad',
+      primaryAction: { label: t('scan.actions.openAppStore'), appName: t('scan.appNames.appstore'), onPress: () => tryOpen(data, t('scan.appNames.noAppStore')) },
     };
   }
 
-  // --- Maps / Geo ---
   if (lower.startsWith('geo:') || lower.includes('maps.google.com/') || lower.includes('google.com/maps/') || lower.includes('maps.apple.com/')) {
     return {
-      kind: 'maps',
-      label: 'Location',
-      icon: 'location-on',
-      iconColor: '#ea4335',
-      primaryAction: { label: 'Open in Maps', appName: 'Maps', onPress: () => tryOpen(data, 'No maps app installed.') },
+      kind: 'maps', label: t('scan.kinds.maps'), icon: 'location-on', iconColor: '#ea4335',
+      primaryAction: { label: t('scan.actions.openMap'), appName: t('scan.appNames.maps'), onPress: () => tryOpen(data, t('scan.appNames.noMaps')) },
     };
   }
 
-  // --- WiFi ---
   if (data.toUpperCase().startsWith('WIFI:')) {
     const wifi = parseWifi(data);
     return {
-      kind: 'wifi',
-      label: 'Wi-Fi Network',
-      icon: 'wifi',
-      iconColor: '#00daf3',
+      kind: 'wifi', label: t('scan.kinds.wifi'), icon: 'wifi', iconColor: '#00daf3',
       primaryAction: {
-        label: 'Copy Password',
-        appName: 'Clipboard',
+        label: t('scan.actions.connectWifi'),
+        appName: t('scan.appNames.wifiHint'),
         onPress: async () => {
           if (wifi.password) {
             await Clipboard.setStringAsync(wifi.password);
-            Alert.alert('Copied!', 'Wi-Fi password copied to clipboard.');
-          } else {
-            Alert.alert('Open Network', 'This network has no password.');
+            Alert.alert(t('common.copied'), t('scan.copiedMsg'));
           }
         },
       },
       parsedFields: [
-        { label: 'Network', value: wifi.ssid },
-        { label: 'Security', value: wifi.encryption === 'nopass' ? 'None' : wifi.encryption },
-        wifi.password && { label: 'Password', value: wifi.password },
+        { label: t('home.wifiSsid'), value: wifi.ssid },
+        { label: t('home.wifiPassword'), value: wifi.encryption === 'nopass' ? t('common.none') : wifi.encryption },
+        wifi.password && { label: t('home.wifiPassword'), value: wifi.password },
       ].filter(Boolean) as { label: string; value: string }[],
     };
   }
 
-  // --- vCard ---
   if (data.toUpperCase().startsWith('BEGIN:VCARD')) {
     const v = parseVCard(data);
     return {
-      kind: 'vcard',
-      label: 'Contact Card',
-      icon: 'person',
-      iconColor: '#bbc3ff',
+      kind: 'vcard', label: t('scan.kinds.vcard'), icon: 'person', iconColor: '#bbc3ff',
       primaryAction: v.phone ? {
-        label: 'Call',
-        appName: 'Phone',
-        onPress: () => tryOpen(`tel:${v.phone}`, 'Cannot make calls.'),
+        label: t('scan.actions.call'), appName: t('scan.appNames.phone'),
+        onPress: () => tryOpen(`tel:${v.phone}`, t('scan.appNames.noPhone')),
       } : undefined,
       parsedFields: [
-        v.name && { label: 'Name', value: v.name },
+        v.name && { label: t('home.contactName'), value: v.name },
         v.org && { label: 'Company', value: v.org },
         v.title && { label: 'Title', value: v.title },
-        v.phone && { label: 'Phone', value: v.phone },
-        v.email && { label: 'Email', value: v.email },
-        v.url && { label: 'Website', value: v.url },
+        v.phone && { label: t('home.contactPhone'), value: v.phone },
+        v.email && { label: t('home.contactEmail'), value: v.email },
+        v.url && { label: t('scan.kinds.website'), value: v.url },
       ].filter(Boolean) as { label: string; value: string }[],
     };
   }
 
-  // --- MeCard ---
   if (data.toUpperCase().startsWith('MECARD:')) {
     const m = parseMeCard(data);
     return {
-      kind: 'mecard',
-      label: 'Contact (MeCard)',
-      icon: 'person',
-      iconColor: '#bbc3ff',
+      kind: 'mecard', label: t('scan.kinds.mecard'), icon: 'person', iconColor: '#bbc3ff',
       primaryAction: m.phone ? {
-        label: 'Call',
-        appName: 'Phone',
-        onPress: () => tryOpen(`tel:${m.phone}`, 'Cannot make calls.'),
+        label: t('scan.actions.call'), appName: t('scan.appNames.phone'),
+        onPress: () => tryOpen(`tel:${m.phone}`, t('scan.appNames.noPhone')),
       } : undefined,
       parsedFields: [
-        m.name && { label: 'Name', value: m.name },
-        m.phone && { label: 'Phone', value: m.phone },
-        m.email && { label: 'Email', value: m.email },
-        m.url && { label: 'Website', value: m.url },
+        m.name && { label: t('home.contactName'), value: m.name },
+        m.phone && { label: t('home.contactPhone'), value: m.phone },
+        m.email && { label: t('home.contactEmail'), value: m.email },
+        m.url && { label: t('scan.kinds.website'), value: m.url },
       ].filter(Boolean) as { label: string; value: string }[],
     };
   }
 
-  // --- Email ---
   if (lower.startsWith('mailto:') || lower.startsWith('matmsg:')) {
     const addr = data.replace(/^mailto:/i, '').split('?')[0];
     return {
-      kind: 'email',
-      label: 'Email',
-      icon: 'email',
-      iconColor: '#ea4335',
-      primaryAction: { label: 'Send Email', appName: 'Email App', onPress: () => tryOpen(data, 'No email app installed.') },
-      parsedFields: [{ label: 'To', value: addr }],
+      kind: 'email', label: t('scan.kinds.email'), icon: 'email', iconColor: '#ea4335',
+      primaryAction: { label: t('scan.actions.sendEmail'), appName: t('scan.appNames.mail'), onPress: () => tryOpen(data, t('scan.appNames.noMail')) },
+      parsedFields: [{ label: t('home.contactEmail'), value: addr }],
     };
   }
 
-  // --- SMS ---
   if (lower.startsWith('sms:') || lower.startsWith('smsto:')) {
     return {
-      kind: 'sms',
-      label: 'SMS Message',
-      icon: 'sms',
-      iconColor: '#25d366',
-      primaryAction: { label: 'Send SMS', appName: 'Messages', onPress: () => tryOpen(data, 'Cannot send SMS.') },
+      kind: 'sms', label: t('scan.kinds.sms'), icon: 'sms', iconColor: '#25d366',
+      primaryAction: { label: t('scan.actions.sendSms'), appName: t('scan.appNames.messages'), onPress: () => tryOpen(data, t('scan.appNames.noSms')) },
     };
   }
 
-  // --- Phone ---
   if (lower.startsWith('tel:') || lower.startsWith('telprompt:')) {
     return {
-      kind: 'phone',
-      label: 'Phone Number',
-      icon: 'call',
-      iconColor: '#00c853',
-      primaryAction: { label: 'Call', appName: 'Phone', onPress: () => tryOpen(data, 'Cannot make calls.') },
-      parsedFields: [{ label: 'Number', value: data.replace(/^tel:/i, '') }],
+      kind: 'phone', label: t('scan.kinds.phone'), icon: 'call', iconColor: '#00c853',
+      primaryAction: { label: t('scan.actions.call'), appName: t('scan.appNames.phone'), onPress: () => tryOpen(data, t('scan.appNames.noPhone')) },
+      parsedFields: [{ label: t('home.contactPhone'), value: data.replace(/^tel:/i, '') }],
     };
   }
 
-  // --- Calendar Event ---
   if (data.toUpperCase().startsWith('BEGIN:VEVENT') || data.toUpperCase().startsWith('BEGIN:VCALENDAR')) {
     return {
-      kind: 'calendar',
-      label: 'Calendar Event',
-      icon: 'event',
-      iconColor: '#4285f4',
+      kind: 'calendar', label: t('scan.kinds.calendar'), icon: 'event', iconColor: '#4285f4',
       primaryAction: {
-        label: 'Copy Event Data',
-        appName: 'Clipboard',
+        label: t('scan.actions.addCalendar'), appName: t('scan.appNames.calendar'),
         onPress: async () => {
           await Clipboard.setStringAsync(data);
-          Alert.alert('Copied!', 'Event data copied. Paste it into your calendar app.');
+          Alert.alert(t('common.copied'), t('scan.copiedMsg'));
         },
       },
     };
   }
 
-  // --- 2FA / OTP ---
   if (lower.startsWith('otpauth://')) {
     return {
-      kind: 'otpauth',
-      label: '2FA Token',
-      icon: 'security',
-      iconColor: '#ff6b35',
-      primaryAction: { label: 'Open in Authenticator', appName: 'Authenticator App', onPress: () => tryOpen(data, 'No authenticator app installed.') },
+      kind: 'otpauth', label: t('scan.kinds.otpauth'), icon: 'security', iconColor: '#ff6b35',
+      primaryAction: { label: t('scan.actions.openApp'), appName: t('scan.appNames.compatible'), onPress: () => tryOpen(data, t('scan.appNames.noHandler')) },
     };
   }
 
-  // --- Magnet link ---
   if (lower.startsWith('magnet:')) {
     return {
-      kind: 'magnet',
-      label: 'Magnet Link',
-      icon: 'link',
-      iconColor: '#9c27b0',
-      primaryAction: { label: 'Open in Torrent App', appName: 'Torrent Client', onPress: () => tryOpen(data, 'No torrent app installed.') },
+      kind: 'magnet', label: t('scan.kinds.magnet'), icon: 'link', iconColor: '#9c27b0',
+      primaryAction: { label: t('scan.actions.openTorrent'), appName: t('scan.appNames.torrent'), onPress: () => tryOpen(data, t('scan.appNames.noTorrent')) },
     };
   }
 
-  // --- HTTP/HTTPS ---
   if (lower.startsWith('http://') || lower.startsWith('https://')) {
     let host = '';
     try { host = new URL(data).hostname.replace(/^www\./, ''); } catch {}
     return {
-      kind: 'url',
-      label: 'Website',
-      icon: 'language',
-      iconColor: '#4285f4',
-      primaryAction: { label: 'Open in Browser', appName: 'Browser', onPress: () => tryOpen(data, 'Could not open URL.') },
+      kind: 'url', label: t('scan.kinds.website'), icon: 'language', iconColor: '#4285f4',
+      primaryAction: { label: t('scan.actions.openBrowser'), appName: t('scan.appNames.browser'), onPress: () => tryOpen(data, t('scan.appNames.noBrowser')) },
       parsedFields: host ? [{ label: 'Host', value: host }] : undefined,
     };
   }
 
-  // --- Generic deep link (something://) ---
   if (/^[a-z][a-z0-9+\-.]*:\/\//i.test(data)) {
     return {
-      kind: 'text',
-      label: 'Deep Link',
-      icon: 'open-in-new',
-      iconColor: DS.secondary,
-      primaryAction: { label: 'Try Open', appName: 'Compatible App', onPress: () => tryOpen(data, 'No app handles this link.') },
+      kind: 'text', label: t('scan.kinds.deeplink'), icon: 'open-in-new', iconColor: ds.secondary,
+      primaryAction: { label: t('scan.actions.tryOpen'), appName: t('scan.appNames.compatible'), onPress: () => tryOpen(data, t('scan.appNames.noHandler')) },
     };
   }
 
-  // --- Plain text ---
   return {
-    kind: 'text',
-    label: 'Text',
-    icon: 'text-fields',
-    iconColor: DS.onSurfaceVariant,
+    kind: 'text', label: t('scan.kinds.text'), icon: 'text-fields', iconColor: ds.onSurfaceVariant,
   };
 }
 
 // === MAIN COMPONENT ===
 
+type ScanMode = 'qr' | 'barcode';
+
+const QR_TYPES = ['qr', 'aztec', 'datamatrix', 'pdf417'] as const;
+const BARCODE_TYPES = ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39', 'code93', 'codabar', 'itf14'] as const;
+
 export default function ScanScreen() {
+  const t = useT();
+  const ds = useDS();
+  const styles = useMemo(() => createStyles(ds), [ds]);
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState<{ type: string; data: string } | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [scanMode, setScanMode] = useState<ScanMode>('qr');
+
+  const activeBarcodeTypes = useMemo(
+    () => (scanMode === 'qr' ? [...QR_TYPES] : [...BARCODE_TYPES]),
+    [scanMode]
+  );
   const { scanHistory, addScanToHistory, deleteScanFromHistory, clearScanHistory } = useQRDesign();
   const screenWidth = Dimensions.get('window').width;
   const frameSize = Math.min(screenWidth - 80, 280);
 
-  const detected = useMemo(() => (scanned ? detectContent(scanned.data) : null), [scanned]);
+  const detected = useMemo(() => (scanned ? detectContent(scanned.data, ds, t) : null), [scanned, ds, t]);
+
+  const isProductBarcode = useMemo(() => {
+    if (!scanned) return false;
+    const t = scanned.type.toLowerCase();
+    if (/ean|upc/.test(t)) return /^\d{8,14}$/.test(scanned.data);
+    return false;
+  }, [scanned]);
+
+  const [product, setProduct] = useState<
+    | { status: 'loading' }
+    | { status: 'found'; name: string; brand?: string; image?: string; quantity?: string; categories?: string }
+    | { status: 'notfound' }
+    | { status: 'error' }
+    | null
+  >(null);
+
+  useEffect(() => {
+    if (!scanned || !isProductBarcode) {
+      setProduct(null);
+      return;
+    }
+    let cancelled = false;
+    setProduct({ status: 'loading' });
+    fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(scanned.data)}.json?fields=product_name,brands,image_front_small_url,image_small_url,quantity,categories`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (cancelled) return;
+        if (json.status === 1 && json.product) {
+          const p = json.product;
+          const name = p.product_name || p.generic_name || '';
+          if (!name) { setProduct({ status: 'notfound' }); return; }
+          setProduct({
+            status: 'found',
+            name,
+            brand: p.brands || undefined,
+            image: p.image_front_small_url || p.image_small_url || undefined,
+            quantity: p.quantity || undefined,
+            categories: p.categories ? String(p.categories).split(',')[0].trim() : undefined,
+          });
+        } else {
+          setProduct({ status: 'notfound' });
+        }
+      })
+      .catch(() => { if (!cancelled) setProduct({ status: 'error' }); });
+    return () => { cancelled = true; };
+  }, [scanned, isProductBarcode]);
 
   const handleBarcodeScanned = useCallback(({ type, data }: { type: string; data: string }) => {
     if (scanned) return;
@@ -506,7 +462,7 @@ export default function ScanScreen() {
   const handleCopy = useCallback(async () => {
     if (scanned) {
       await Clipboard.setStringAsync(scanned.data);
-      Alert.alert('Copied!', 'Raw data copied to clipboard.');
+      Alert.alert(t('common.copied'), t('scan.copiedMsg'));
     }
   }, [scanned]);
 
@@ -518,9 +474,9 @@ export default function ScanScreen() {
   }, []);
 
   const handleClearHistory = useCallback(() => {
-    Alert.alert('Clear History', 'Remove all scanned items? This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Clear All', style: 'destructive', onPress: () => clearScanHistory() },
+    Alert.alert(t('scan.historyClearTitle'), t('scan.historyClear'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.clearAll'), style: 'destructive', onPress: () => clearScanHistory() },
     ]);
   }, [clearScanHistory]);
 
@@ -532,7 +488,7 @@ export default function ScanScreen() {
   if (!permission) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.statusText}>Loading camera...</Text>
+        <Text style={styles.statusText}>{t('scan.loadingCamera')}</Text>
       </View>
     );
   }
@@ -542,12 +498,12 @@ export default function ScanScreen() {
       <View style={styles.centerContainer}>
         <View style={styles.permissionBox}>
           <View style={styles.iconCircle}>
-            <MaterialIcons name="qr-code-scanner" size={48} color={DS.secondary} />
+            <MaterialIcons name="qr-code-scanner" size={48} color={ds.secondary} />
           </View>
-          <Text style={styles.permissionTitle}>Camera Access Needed</Text>
-          <Text style={styles.permissionDesc}>To scan QR codes, please allow access to your camera.</Text>
+          <Text style={styles.permissionTitle}>{t('scan.permissionTitle')}</Text>
+          <Text style={styles.permissionDesc}>{t('scan.permissionDesc')}</Text>
           <Pressable style={styles.permissionBtn} onPress={requestPermission}>
-            <Text style={styles.permissionBtnText}>Grant Permission</Text>
+            <Text style={styles.permissionBtnText}>{t('scan.permissionGrant')}</Text>
           </Pressable>
         </View>
       </View>
@@ -557,23 +513,50 @@ export default function ScanScreen() {
   return (
     <View style={styles.container}>
       <CameraView
+        key={scanMode}
         style={StyleSheet.absoluteFillObject}
         facing="back"
         barcodeScannerSettings={{
-          barcodeTypes: ['qr', 'pdf417', 'aztec', 'datamatrix', 'ean13', 'ean8', 'code128', 'code39'],
+          barcodeTypes: activeBarcodeTypes,
         }}
         onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
       />
 
       {/* Header */}
       <View style={styles.headerOverlay}>
-        <Text style={styles.headerTitle}>Scan QR Code</Text>
-        <Text style={styles.headerSubtitle}>Position the code inside the frame</Text>
+        <Text style={styles.headerTitle}>
+          {scanMode === 'qr' ? t('scan.title') : t('scan.titleBarcode')}
+        </Text>
+        <Text style={styles.headerSubtitle}>{t('scan.subtitle')}</Text>
+      </View>
+
+      {/* Mode selector */}
+      <View style={styles.modeSelector} pointerEvents="box-none">
+        <View style={styles.modeSelectorInner}>
+          {(['qr', 'barcode'] as ScanMode[]).map((m) => {
+            const active = scanMode === m;
+            return (
+              <Pressable
+                key={m}
+                style={[styles.modeOption, active && styles.modeOptionActive]}
+                onPress={() => setScanMode(m)}>
+                <MaterialIcons
+                  name={m === 'qr' ? 'qr-code-2' : 'view-week'}
+                  size={16}
+                  color={active ? ds.onPrimary : '#fff'}
+                />
+                <Text style={[styles.modeOptionText, active && styles.modeOptionTextActive]}>
+                  {m === 'qr' ? t('scan.modeQR') : t('scan.modeBarcode')}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
 
       {/* History button */}
       <Pressable style={styles.historyFab} onPress={() => setHistoryOpen(true)} hitSlop={8}>
-        <MaterialIcons name="history" size={22} color={DS.onSurface} />
+        <MaterialIcons name="history" size={22} color={ds.onSurface} />
         {scanHistory.length > 0 && (
           <View style={styles.historyBadge}>
             <Text style={styles.historyBadgeText}>{scanHistory.length > 99 ? '99+' : scanHistory.length}</Text>
@@ -601,10 +584,46 @@ export default function ScanScreen() {
                 <MaterialIcons name={detected.icon} size={26} color={detected.iconColor} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.resultLabel}>Detected</Text>
-                <Text style={styles.resultType}>{detected.label}</Text>
+                <Text style={styles.resultLabel}>{t('scan.detected')}</Text>
+                <Text style={styles.resultType}>
+                  {isProductBarcode ? `Product Barcode (${scanned.type.toUpperCase()})` : detected.label}
+                </Text>
               </View>
             </View>
+
+            {/* Product lookup */}
+            {isProductBarcode && (
+              <View style={styles.productBox}>
+                {product?.status === 'loading' && (
+                  <View style={styles.productLoading}>
+                    <ActivityIndicator size="small" color={ds.primary} />
+                    <Text style={styles.productLoadingText}>{t('scan.productLookup')}</Text>
+                  </View>
+                )}
+                {product?.status === 'found' && (
+                  <View style={styles.productRow}>
+                    {product.image ? (
+                      <Image source={{ uri: product.image }} style={styles.productImage} />
+                    ) : (
+                      <View style={[styles.productImage, styles.productImagePlaceholder]}>
+                        <MaterialIcons name="inventory-2" size={28} color={ds.onSurfaceVariant} />
+                      </View>
+                    )}
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+                      {!!product.brand && <Text style={styles.productBrand} numberOfLines={1}>{product.brand}</Text>}
+                      {!!product.quantity && <Text style={styles.productMeta} numberOfLines={1}>{product.quantity}</Text>}
+                      {!!product.categories && <Text style={styles.productMeta} numberOfLines={1}>{product.categories}</Text>}
+                    </View>
+                  </View>
+                )}
+                {(product?.status === 'notfound' || product?.status === 'error') && (
+                  <Text style={styles.productEmpty}>
+                    {product.status === 'error' ? t('scan.productLookupFailed') : t('scan.productNotFound')}
+                  </Text>
+                )}
+              </View>
+            )}
 
             {/* Parsed fields */}
             {detected.parsedFields && detected.parsedFields.length > 0 && (
@@ -623,27 +642,41 @@ export default function ScanScreen() {
               <Text style={styles.resultData} numberOfLines={6}>{scanned.data}</Text>
             )}
 
+            {/* Barcode online search */}
+            {isProductBarcode && (
+              <Pressable
+                style={styles.primaryActionBtn}
+                onPress={() => tryOpen(`https://www.google.com/search?q=${encodeURIComponent(scanned.data)}`, 'Could not open browser.')}>
+                <MaterialIcons name="search" size={20} color={ds.onPrimary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.primaryActionText}>{t('common.searchOnline')}</Text>
+                  <Text style={styles.primaryActionSub}>{t('scan.googleThis')}</Text>
+                </View>
+                <MaterialIcons name="arrow-forward" size={20} color={ds.onPrimary} />
+              </Pressable>
+            )}
+
             {/* Primary action */}
-            {detected.primaryAction && (
+            {!isProductBarcode && detected.primaryAction && (
               <Pressable style={styles.primaryActionBtn} onPress={detected.primaryAction.onPress}>
-                <MaterialIcons name="open-in-new" size={20} color={DS.onPrimary} />
+                <MaterialIcons name="open-in-new" size={20} color={ds.onPrimary} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.primaryActionText}>{detected.primaryAction.label}</Text>
                   <Text style={styles.primaryActionSub}>{detected.primaryAction.appName}</Text>
                 </View>
-                <MaterialIcons name="arrow-forward" size={20} color={DS.onPrimary} />
+                <MaterialIcons name="arrow-forward" size={20} color={ds.onPrimary} />
               </Pressable>
             )}
 
             {/* Secondary actions */}
             <View style={styles.resultActions}>
               <Pressable style={styles.actionBtn} onPress={handleCopy}>
-                <MaterialIcons name="content-copy" size={18} color={DS.primary} />
-                <Text style={styles.actionBtnText}>Copy</Text>
+                <MaterialIcons name="content-copy" size={18} color={ds.primary} />
+                <Text style={styles.actionBtnText}>{t('common.copy')}</Text>
               </Pressable>
               <Pressable style={[styles.actionBtn, styles.scanAgainBtn]} onPress={handleScanAgain}>
-                <MaterialIcons name="qr-code-scanner" size={18} color={DS.onPrimary} />
-                <Text style={[styles.actionBtnText, { color: DS.onPrimary }]}>Scan Again</Text>
+                <MaterialIcons name="qr-code-scanner" size={18} color={ds.onPrimary} />
+                <Text style={[styles.actionBtnText, { color: ds.onPrimary }]}>{t('scan.scanAgain')}</Text>
               </Pressable>
             </View>
           </ScrollView>
@@ -656,31 +689,33 @@ export default function ScanScreen() {
           <View style={styles.historyPanel}>
             <View style={styles.historyHeader}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.historyTitle}>Scan History</Text>
+                <Text style={styles.historyTitle}>{t('scan.history')}</Text>
                 <Text style={styles.historySubtitle}>
-                  {scanHistory.length === 0 ? 'No scans yet' : `${scanHistory.length} ${scanHistory.length === 1 ? 'scan' : 'scans'}`}
+                  {scanHistory.length === 0
+                    ? t('scan.noScans')
+                    : (scanHistory.length === 1 ? t('scan.scanCount') : t('scan.scansCount')).replace('{n}', String(scanHistory.length))}
                 </Text>
               </View>
               {scanHistory.length > 0 && (
                 <Pressable style={styles.clearAllBtn} onPress={handleClearHistory}>
-                  <MaterialIcons name="delete-sweep" size={18} color={DS.error} />
-                  <Text style={styles.clearAllText}>Clear All</Text>
+                  <MaterialIcons name="delete-sweep" size={18} color={ds.error} />
+                  <Text style={styles.clearAllText}>{t('common.clearAll')}</Text>
                 </Pressable>
               )}
               <Pressable style={styles.closeBtn} onPress={() => setHistoryOpen(false)}>
-                <MaterialIcons name="close" size={22} color={DS.onSurface} />
+                <MaterialIcons name="close" size={22} color={ds.onSurface} />
               </Pressable>
             </View>
 
             {scanHistory.length === 0 ? (
               <View style={styles.historyEmpty}>
-                <MaterialIcons name="history" size={48} color={DS.outlineVariant} />
-                <Text style={styles.historyEmptyText}>Scanned codes will appear here</Text>
+                <MaterialIcons name="history" size={48} color={ds.outlineVariant} />
+                <Text style={styles.historyEmptyText}>{t('scan.historyEmpty')}</Text>
               </View>
             ) : (
               <ScrollView style={styles.historyList} contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
                 {scanHistory.map((entry) => {
-                  const det = detectContent(entry.data);
+                  const det = detectContent(entry.data, ds, t);
                   return (
                     <Pressable
                       key={entry.id}
@@ -701,7 +736,7 @@ export default function ScanScreen() {
                           e.stopPropagation();
                           handleDeleteHistoryItem(entry.id);
                         }}>
-                        <MaterialIcons name="delete-outline" size={20} color={DS.onSurfaceVariant} />
+                        <MaterialIcons name="delete-outline" size={20} color={ds.onSurfaceVariant} />
                       </Pressable>
                     </Pressable>
                   );
@@ -727,25 +762,43 @@ function historyTimeAgo(ts: number): string {
   return new Date(ts).toLocaleDateString();
 }
 
-const styles = StyleSheet.create({
+function createStyles(ds: DSPalette) {
+  return StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
-  centerContainer: { flex: 1, backgroundColor: DS.surface, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  statusText: { color: DS.onSurfaceVariant, fontSize: 14 },
+  centerContainer: { flex: 1, backgroundColor: ds.surface, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  statusText: { color: ds.onSurfaceVariant, fontSize: 14 },
 
   permissionBox: { alignItems: 'center', gap: 14, maxWidth: 320 },
-  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: DS.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center' },
-  permissionTitle: { fontSize: 22, fontWeight: '800', color: DS.onSurface, marginTop: 4 },
-  permissionDesc: { fontSize: 14, color: DS.onSurfaceVariant, textAlign: 'center', lineHeight: 20 },
-  permissionBtn: { backgroundColor: DS.primary, paddingHorizontal: 32, paddingVertical: 14, borderRadius: 12, marginTop: 8 },
-  permissionBtnText: { color: DS.onPrimary, fontWeight: '800', fontSize: 15 },
+  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: ds.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center' },
+  permissionTitle: { fontSize: 22, fontWeight: '800', color: ds.onSurface, marginTop: 4 },
+  permissionDesc: { fontSize: 14, color: ds.onSurfaceVariant, textAlign: 'center', lineHeight: 20 },
+  permissionBtn: { backgroundColor: ds.primary, paddingHorizontal: 32, paddingVertical: 14, borderRadius: 12, marginTop: 8 },
+  permissionBtnText: { color: ds.onPrimary, fontWeight: '800', fontSize: 15 },
 
   headerOverlay: { position: 'absolute', top: 30, left: 0, right: 0, alignItems: 'center', gap: 4, paddingHorizontal: 20 },
   headerTitle: { fontSize: 24, fontWeight: '800', color: '#fff', textShadowColor: 'rgba(0,0,0,0.6)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
   headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.85)', textShadowColor: 'rgba(0,0,0,0.6)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
 
+  modeSelector: {
+    position: 'absolute', bottom: 40, left: 0, right: 0, alignItems: 'center',
+  },
+  modeSelectorInner: {
+    flexDirection: 'row', gap: 4, padding: 4,
+    backgroundColor: 'rgba(40, 42, 44, 0.85)',
+    borderRadius: 999,
+    borderWidth: 1, borderColor: `${ds.outlineVariant}55`,
+  },
+  modeOption: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999,
+  },
+  modeOptionActive: { backgroundColor: ds.primary },
+  modeOptionText: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  modeOptionTextActive: { color: ds.onPrimary },
+
   frameWrapper: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   scanFrame: { position: 'relative' },
-  corner: { position: 'absolute', width: 36, height: 36, borderColor: DS.secondaryFixedDim },
+  corner: { position: 'absolute', width: 36, height: 36, borderColor: ds.secondaryFixedDim },
   cornerTL: { top: 0, left: 0, borderTopWidth: 4, borderLeftWidth: 4, borderTopLeftRadius: 8 },
   cornerTR: { top: 0, right: 0, borderTopWidth: 4, borderRightWidth: 4, borderTopRightRadius: 8 },
   cornerBL: { bottom: 0, left: 0, borderBottomWidth: 4, borderLeftWidth: 4, borderBottomLeftRadius: 8 },
@@ -754,40 +807,53 @@ const styles = StyleSheet.create({
   // Result
   resultOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 14, paddingBottom: 20, maxHeight: '70%' },
   resultCard: {
-    backgroundColor: DS.surfaceContainerHigh, borderRadius: 18, padding: 16,
-    borderWidth: 1, borderColor: `${DS.secondaryFixedDim}33`,
+    backgroundColor: ds.surfaceContainerHigh, borderRadius: 18, padding: 16,
+    borderWidth: 1, borderColor: `${ds.secondaryFixedDim}33`,
   },
   resultHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   resultIcon: { width: 46, height: 46, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  resultLabel: { fontSize: 10, fontWeight: '700', color: DS.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 1 },
-  resultType: { fontSize: 17, fontWeight: '800', color: DS.onSurface, marginTop: 1 },
+  resultLabel: { fontSize: 10, fontWeight: '700', color: ds.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 1 },
+  resultType: { fontSize: 17, fontWeight: '800', color: ds.onSurface, marginTop: 1 },
 
   fieldsBox: {
-    backgroundColor: DS.surfaceContainerLowest, borderRadius: 12, padding: 12, gap: 8,
+    backgroundColor: ds.surfaceContainerLowest, borderRadius: 12, padding: 12, gap: 8,
   },
   fieldRow: { gap: 2 },
-  fieldLabel: { fontSize: 10, fontWeight: '700', color: DS.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.8 },
-  fieldValue: { fontSize: 14, fontWeight: '600', color: DS.onSurface },
+  fieldLabel: { fontSize: 10, fontWeight: '700', color: ds.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.8 },
+  fieldValue: { fontSize: 14, fontWeight: '600', color: ds.onSurface },
+
+  productBox: {
+    backgroundColor: ds.surfaceContainerLowest, borderRadius: 12, padding: 12,
+  },
+  productLoading: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 4 },
+  productLoadingText: { fontSize: 13, color: ds.onSurfaceVariant },
+  productRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  productImage: { width: 64, height: 64, borderRadius: 8, backgroundColor: ds.surfaceContainer },
+  productImagePlaceholder: { alignItems: 'center', justifyContent: 'center' },
+  productName: { fontSize: 15, fontWeight: '800', color: ds.onSurface },
+  productBrand: { fontSize: 13, fontWeight: '600', color: ds.primary },
+  productMeta: { fontSize: 11, color: ds.onSurfaceVariant },
+  productEmpty: { fontSize: 13, color: ds.onSurfaceVariant, fontStyle: 'italic' },
 
   resultData: {
-    fontSize: 13, color: DS.onSurface, lineHeight: 19,
-    backgroundColor: DS.surfaceContainerLowest, padding: 12, borderRadius: 10,
+    fontSize: 13, color: ds.onSurface, lineHeight: 19,
+    backgroundColor: ds.surfaceContainerLowest, padding: 12, borderRadius: 10,
   },
 
   primaryActionBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: DS.primary, paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12,
+    backgroundColor: ds.primary, paddingHorizontal: 16, paddingVertical: 14, borderRadius: 12,
   },
-  primaryActionText: { fontSize: 14, fontWeight: '800', color: DS.onPrimary },
-  primaryActionSub: { fontSize: 11, fontWeight: '600', color: DS.onPrimary, opacity: 0.7, marginTop: 1 },
+  primaryActionText: { fontSize: 14, fontWeight: '800', color: ds.onPrimary },
+  primaryActionSub: { fontSize: 11, fontWeight: '600', color: ds.onPrimary, opacity: 0.7, marginTop: 1 },
 
   resultActions: { flexDirection: 'row', gap: 8 },
   actionBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    paddingVertical: 12, borderRadius: 10, backgroundColor: DS.surfaceContainer,
+    paddingVertical: 12, borderRadius: 10, backgroundColor: ds.surfaceContainer,
   },
-  scanAgainBtn: { backgroundColor: DS.primaryContainer },
-  actionBtnText: { fontSize: 13, fontWeight: '700', color: DS.primary },
+  scanAgainBtn: { backgroundColor: ds.primaryContainer },
+  actionBtnText: { fontSize: 13, fontWeight: '700', color: ds.primary },
 
   // History FAB
   historyFab: {
@@ -795,16 +861,16 @@ const styles = StyleSheet.create({
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: 'rgba(40, 42, 44, 0.85)',
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: `${DS.outlineVariant}55`,
+    borderWidth: 1, borderColor: `${ds.outlineVariant}55`,
   },
   historyBadge: {
     position: 'absolute', top: -2, right: -2,
     minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 4,
-    backgroundColor: DS.secondaryFixedDim,
+    backgroundColor: ds.secondaryFixedDim,
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2, borderColor: DS.surface,
+    borderWidth: 2, borderColor: ds.surface,
   },
-  historyBadgeText: { fontSize: 9, fontWeight: '900', color: DS.surface },
+  historyBadgeText: { fontSize: 9, fontWeight: '900', color: ds.surface },
 
   // History Panel
   historyOverlay: {
@@ -813,7 +879,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   historyPanel: {
-    backgroundColor: DS.surfaceContainerLow,
+    backgroundColor: ds.surfaceContainerLow,
     borderTopLeftRadius: 20, borderTopRightRadius: 20,
     paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24,
     maxHeight: '85%',
@@ -821,35 +887,36 @@ const styles = StyleSheet.create({
   historyHeader: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingBottom: 14, marginBottom: 8,
-    borderBottomWidth: 1, borderBottomColor: `${DS.outlineVariant}22`,
+    borderBottomWidth: 1, borderBottomColor: `${ds.outlineVariant}22`,
   },
-  historyTitle: { fontSize: 20, fontWeight: '800', color: DS.onSurface },
-  historySubtitle: { fontSize: 12, color: DS.onSurfaceVariant, marginTop: 2 },
+  historyTitle: { fontSize: 20, fontWeight: '800', color: ds.onSurface },
+  historySubtitle: { fontSize: 12, color: ds.onSurfaceVariant, marginTop: 2 },
   clearAllBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8,
-    backgroundColor: `${DS.errorContainer}33`,
+    backgroundColor: `${ds.errorContainer}33`,
   },
-  clearAllText: { fontSize: 12, fontWeight: '700', color: DS.error },
+  clearAllText: { fontSize: 12, fontWeight: '700', color: ds.error },
   closeBtn: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: DS.surfaceContainerHigh,
+    backgroundColor: ds.surfaceContainerHigh,
     alignItems: 'center', justifyContent: 'center',
   },
   historyEmpty: { alignItems: 'center', paddingVertical: 60, gap: 12 },
-  historyEmptyText: { fontSize: 14, color: DS.onSurfaceVariant },
+  historyEmptyText: { fontSize: 14, color: ds.onSurfaceVariant },
   historyList: { maxHeight: '100%' },
   historyItem: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: DS.surfaceContainerHigh,
+    backgroundColor: ds.surfaceContainerHigh,
     borderRadius: 12, padding: 12,
   },
   historyItemIcon: {
     width: 38, height: 38, borderRadius: 10,
     alignItems: 'center', justifyContent: 'center',
   },
-  historyItemLabel: { fontSize: 12, fontWeight: '700', color: DS.onSurface },
-  historyItemData: { fontSize: 13, color: DS.onSurfaceVariant, marginTop: 1 },
-  historyItemTime: { fontSize: 10, color: DS.outline, marginTop: 3 },
+  historyItemLabel: { fontSize: 12, fontWeight: '700', color: ds.onSurface },
+  historyItemData: { fontSize: 13, color: ds.onSurfaceVariant, marginTop: 1 },
+  historyItemTime: { fontSize: 10, color: ds.outline, marginTop: 3 },
   historyDeleteBtn: { padding: 6 },
-});
+  });
+}

@@ -22,7 +22,7 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.anonymous.qrdesigner"
+      "package": "com.thevibes.qrdesigner"
     },
     "web": {
       "output": "static",
@@ -47,7 +47,8 @@
         {
           "cameraPermission": "Allow Designer QR to use your camera to scan QR codes."
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

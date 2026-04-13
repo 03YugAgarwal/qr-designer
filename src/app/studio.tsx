@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -18,15 +18,16 @@ import { router } from 'expo-router';
 import CustomQRCode, { type BodyShape, type EyeFrameShape, type EyeBallShape } from '@/components/custom-qr';
 import { BUILTIN_LOGOS, BrandIcon, LogoOverlay, getLogoById } from '@/components/builtin-logos';
 import { useQRDesign } from '@/context/qr-design-context';
-import { DS } from '@/constants/theme';
+import { useDS, type DSPalette } from '@/theme/theme-provider';
+import { useT } from '@/i18n';
 
 type TabKey = 'colors' | 'body' | 'eyes' | 'logo';
 
-const TABS: { key: TabKey; label: string; icon: keyof typeof MaterialIcons.glyphMap }[] = [
-  { key: 'colors', label: 'Colors', icon: 'palette' },
-  { key: 'body', label: 'Body', icon: 'category' },
-  { key: 'eyes', label: 'Eyes', icon: 'visibility' },
-  { key: 'logo', label: 'Logo', icon: 'add-photo-alternate' },
+const TABS: { key: TabKey; labelKey: string; icon: keyof typeof MaterialIcons.glyphMap }[] = [
+  { key: 'colors', labelKey: 'studio.tabColors', icon: 'palette' },
+  { key: 'body', labelKey: 'studio.tabBody', icon: 'category' },
+  { key: 'eyes', labelKey: 'studio.tabEyes', icon: 'visibility' },
+  { key: 'logo', labelKey: 'studio.tabLogo', icon: 'add-photo-alternate' },
 ];
 
 const BODY_COLORS = ['#0c0e10', '#1a1a2e', '#16213e', '#0f3460', '#533483', '#e94560', '#00daf3', '#bbc3ff', '#ffffff'];
@@ -34,37 +35,24 @@ const BG_COLORS = ['#ffffff', '#f5f5f5', '#fdf6e3', '#121416', '#1a1c1e', '#0c0e
 const EYE_COLORS = ['#0c0e10', '#2243ea', '#00daf3', '#642de6', '#e94560', '#ff6b35', '#00c853', '#ffffff', '#bbc3ff'];
 const GRADIENT_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
-const BODY_SHAPES: { id: BodyShape; label: string }[] = [
-  { id: 'square', label: 'Square' },
-  { id: 'dots', label: 'Dots' },
-  { id: 'rounded', label: 'Rounded' },
-  { id: 'diamond', label: 'Diamond' },
-  { id: 'classy', label: 'Classy' },
-  { id: 'star', label: 'Star' },
-  { id: 'vertical', label: 'Vertical' },
-  { id: 'horizontal', label: 'Horizontal' },
-  { id: 'cross', label: 'Cross' },
-  { id: 'hexagon', label: 'Hexagon' },
-  { id: 'triangle', label: 'Triangle' },
+const BODY_SHAPES: { id: BodyShape }[] = [
+  { id: 'square' }, { id: 'dots' }, { id: 'rounded' }, { id: 'diamond' },
+  { id: 'classy' }, { id: 'star' }, { id: 'vertical' }, { id: 'horizontal' },
+  { id: 'cross' }, { id: 'hexagon' }, { id: 'triangle' },
 ];
 
-const EYE_FRAME_SHAPES: { id: EyeFrameShape; label: string }[] = [
-  { id: 'square', label: 'Square' },
-  { id: 'rounded', label: 'Rounded' },
-  { id: 'circle', label: 'Circle' },
-  { id: 'leaf', label: 'Leaf' },
+const EYE_FRAME_SHAPES: { id: EyeFrameShape }[] = [
+  { id: 'square' }, { id: 'rounded' }, { id: 'circle' }, { id: 'leaf' },
 ];
 
-const EYE_BALL_SHAPES: { id: EyeBallShape; label: string }[] = [
-  { id: 'square', label: 'Square' },
-  { id: 'rounded', label: 'Rounded' },
-  { id: 'circle', label: 'Circle' },
-  { id: 'leaf', label: 'Leaf' },
+const EYE_BALL_SHAPES: { id: EyeBallShape }[] = [
+  { id: 'square' }, { id: 'rounded' }, { id: 'circle' }, { id: 'leaf' },
 ];
 
 // --- Mini shape previews for body picker ---
 function BodyShapePreview({ shape, active }: { shape: BodyShape; active: boolean }) {
-  const color = active ? DS.primary : DS.onSurfaceVariant;
+  const ds = useDS();
+  const color = active ? ds.primary : ds.onSurfaceVariant;
   const s = 36;
   const cs = 8;
   const gap = 2;
@@ -143,7 +131,8 @@ function BodyShapePreview({ shape, active }: { shape: BodyShape; active: boolean
 
 // --- Mini eye frame preview ---
 function EyeFramePreview({ shape, active }: { shape: EyeFrameShape; active: boolean }) {
-  const color = active ? DS.primary : DS.onSurfaceVariant;
+  const ds = useDS();
+  const color = active ? ds.primary : ds.onSurfaceVariant;
   const s = 32;
   const t = 3;
   switch (shape) {
@@ -168,7 +157,8 @@ function EyeFramePreview({ shape, active }: { shape: EyeFrameShape; active: bool
 
 // --- Mini eye ball preview ---
 function EyeBallPreview({ shape, active }: { shape: EyeBallShape; active: boolean }) {
-  const color = active ? DS.primary : DS.onSurfaceVariant;
+  const ds = useDS();
+  const color = active ? ds.primary : ds.onSurfaceVariant;
   const s = 32;
   const m = 6;
   switch (shape) {
@@ -188,6 +178,9 @@ function EyeBallPreview({ shape, active }: { shape: EyeBallShape; active: boolea
 // === MAIN COMPONENT ===
 
 export default function StudioScreen() {
+  const t = useT();
+  const ds = useDS();
+  const styles = useMemo(() => createStyles(ds), [ds]);
   const ctx = useQRDesign();
   const [activeTab, setActiveTab] = useState<TabKey>('colors');
   const screenWidth = Dimensions.get('window').width;
@@ -222,7 +215,7 @@ export default function StudioScreen() {
 
   const toggleGradient = useCallback((on: boolean) => {
     if (on) {
-      ctx.setBodyGradient({ colors: [ctx.bodyColor, DS.secondaryFixedDim], angle: 135 });
+      ctx.setBodyGradient({ colors: [ctx.bodyColor, ds.secondaryFixedDim], angle: 135 });
     } else {
       ctx.setBodyGradient(null);
     }
@@ -281,7 +274,7 @@ export default function StudioScreen() {
         </View>
         <View style={styles.liveBadge}>
           <View style={styles.liveDot} />
-          <Text style={styles.liveText}>Live Preview</Text>
+          <Text style={styles.liveText}>{t('studio.livePreview')}</Text>
         </View>
       </View>
 
@@ -292,8 +285,8 @@ export default function StudioScreen() {
             key={tab.key}
             style={[styles.tabItem, activeTab === tab.key && styles.tabItemActive]}
             onPress={() => setActiveTab(tab.key)}>
-            <MaterialIcons name={tab.icon} size={18} color={activeTab === tab.key ? DS.primary : DS.onSurfaceVariant} />
-            <Text style={[styles.tabLabel, activeTab === tab.key && styles.tabLabelActive]}>{tab.label}</Text>
+            <MaterialIcons name={tab.icon} size={18} color={activeTab === tab.key ? ds.primary : ds.onSurfaceVariant} />
+            <Text style={[styles.tabLabel, activeTab === tab.key && styles.tabLabelActive]}>{t(tab.labelKey)}</Text>
           </Pressable>
         ))}
       </View>
@@ -301,10 +294,10 @@ export default function StudioScreen() {
       {/* === COLORS TAB === */}
       {activeTab === 'colors' && (
         <View style={styles.tabSection}>
-          <ColorPicker icon="grid-view" title="Body Color" colors={BODY_COLORS} selected={ctx.bodyColor} onSelect={ctx.setBodyColor} />
-          <ColorPicker icon="center-focus-strong" title="Eye Frame Color" colors={EYE_COLORS} selected={ctx.eyeFrameColor} onSelect={ctx.setEyeFrameColor} />
-          <ColorPicker icon="lens" title="Eye Ball Color" colors={EYE_COLORS} selected={ctx.eyeBallColor} onSelect={ctx.setEyeBallColor} />
-          <ColorPicker icon="wallpaper" title="Background" colors={BG_COLORS} selected={ctx.bgColor} onSelect={ctx.setBgColor} />
+          <ColorPicker icon="grid-view" title={t('studio.bodyColor')} colors={BODY_COLORS} selected={ctx.bodyColor} onSelect={ctx.setBodyColor} />
+          <ColorPicker icon="center-focus-strong" title={t('studio.eyeFrameColor')} colors={EYE_COLORS} selected={ctx.eyeFrameColor} onSelect={ctx.setEyeFrameColor} />
+          <ColorPicker icon="lens" title={t('studio.eyeBallColor')} colors={EYE_COLORS} selected={ctx.eyeBallColor} onSelect={ctx.setEyeBallColor} />
+          <ColorPicker icon="wallpaper" title={t('studio.background')} colors={BG_COLORS} selected={ctx.bgColor} onSelect={ctx.setBgColor} />
 
           {/* Quick: match all colors button */}
           <Pressable
@@ -313,18 +306,18 @@ export default function StudioScreen() {
               ctx.setEyeFrameColor(ctx.bodyColor);
               ctx.setEyeBallColor(ctx.bodyColor);
             }}>
-            <MaterialIcons name="color-lens" size={16} color={DS.secondary} />
-            <Text style={styles.matchColorsText}>Match Eyes to Body Color</Text>
+            <MaterialIcons name="color-lens" size={16} color={ds.secondary} />
+            <Text style={styles.matchColorsText}>{t('studio.matchEyes')}</Text>
           </Pressable>
 
           {/* Background Image Picker */}
           <View style={styles.gradientSection}>
             <View style={styles.gradientHeader}>
-              <MaterialIcons name="image" size={18} color={DS.onSurface} />
-              <Text style={styles.gradientTitle}>Background Image</Text>
+              <MaterialIcons name="image" size={18} color={ds.onSurface} />
+              <Text style={styles.gradientTitle}>{t('studio.backgroundImage')}</Text>
               {ctx.bgImageUri && (
                 <Pressable onPress={() => ctx.setBgImageUri(null)} hitSlop={8}>
-                  <MaterialIcons name="close" size={20} color={DS.error} />
+                  <MaterialIcons name="close" size={20} color={ds.error} />
                 </Pressable>
               )}
             </View>
@@ -333,11 +326,11 @@ export default function StudioScreen() {
                 <Image source={{ uri: ctx.bgImageUri }} style={styles.bgImagePreview} />
                 <View style={styles.bgImageActions}>
                   <Pressable style={styles.bgImageBtn} onPress={pickBgImage}>
-                    <MaterialIcons name="swap-horiz" size={18} color={DS.primary} />
-                    <Text style={styles.bgImageBtnText}>Change</Text>
+                    <MaterialIcons name="swap-horiz" size={18} color={ds.primary} />
+                    <Text style={styles.bgImageBtnText}>{t('common.change')}</Text>
                   </Pressable>
                 </View>
-                <Text style={styles.gradientLabel}>Image Opacity</Text>
+                <Text style={styles.gradientLabel}>{t('studio.imageOpacity')}</Text>
                 <View style={styles.angleRow}>
                   {[0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0].map((op) => (
                     <Pressable key={op} onPress={() => ctx.setBgImageOpacity(op)}
@@ -348,14 +341,12 @@ export default function StudioScreen() {
                     </Pressable>
                   ))}
                 </View>
-                <Text style={styles.bgImageHint}>
-                  Lower opacity keeps the QR code scannable. Use high contrast body color for best results.
-                </Text>
+                <Text style={styles.bgImageHint}>{t('studio.opacityHint')}</Text>
               </>
             ) : (
               <Pressable style={styles.bgImageUploadBtn} onPress={pickBgImage}>
-                <MaterialIcons name="add-photo-alternate" size={24} color={DS.secondary} />
-                <Text style={styles.bgImageUploadText}>Pick Background Image</Text>
+                <MaterialIcons name="add-photo-alternate" size={24} color={ds.secondary} />
+                <Text style={styles.bgImageUploadText}>{t('studio.pickBackground')}</Text>
               </Pressable>
             )}
           </View>
@@ -363,20 +354,20 @@ export default function StudioScreen() {
           {/* Gradient Toggle */}
           <View style={styles.gradientSection}>
             <View style={styles.gradientHeader}>
-              <MaterialIcons name="gradient" size={18} color={DS.onSurface} />
-              <Text style={styles.gradientTitle}>Body Gradient</Text>
+              <MaterialIcons name="gradient" size={18} color={ds.onSurface} />
+              <Text style={styles.gradientTitle}>{t('studio.bodyGradient')}</Text>
               <Switch
                 value={ctx.bodyGradient !== null}
                 onValueChange={toggleGradient}
-                trackColor={{ false: DS.surfaceContainerHighest, true: DS.primaryContainer }}
-                thumbColor={ctx.bodyGradient ? DS.primary : DS.onSurfaceVariant}
+                trackColor={{ false: ds.surfaceContainerHighest, true: ds.primaryContainer }}
+                thumbColor={ctx.bodyGradient ? ds.primary : ds.onSurfaceVariant}
               />
             </View>
             {ctx.bodyGradient && (
               <>
                 <View style={styles.gradientColors}>
                   <View style={styles.gradientColorCol}>
-                    <Text style={styles.gradientLabel}>Start</Text>
+                    <Text style={styles.gradientLabel}>{t('studio.gradStart')}</Text>
                     <View style={styles.swatchRow}>
                       {BODY_COLORS.map((c) => (
                         <Pressable key={c} onPress={() => setGradColor(0, c)}
@@ -385,7 +376,7 @@ export default function StudioScreen() {
                     </View>
                   </View>
                   <View style={styles.gradientColorCol}>
-                    <Text style={styles.gradientLabel}>End</Text>
+                    <Text style={styles.gradientLabel}>{t('studio.gradEnd')}</Text>
                     <View style={styles.swatchRow}>
                       {BODY_COLORS.map((c) => (
                         <Pressable key={c} onPress={() => setGradColor(1, c)}
@@ -394,7 +385,7 @@ export default function StudioScreen() {
                     </View>
                   </View>
                 </View>
-                <Text style={styles.gradientLabel}>Direction</Text>
+                <Text style={styles.gradientLabel}>{t('studio.gradDirection')}</Text>
                 <View style={styles.angleRow}>
                   {GRADIENT_ANGLES.map((a) => (
                     <Pressable key={a} onPress={() => setGradAngle(a)}
@@ -412,7 +403,7 @@ export default function StudioScreen() {
       {/* === BODY SHAPES TAB === */}
       {activeTab === 'body' && (
         <View style={styles.tabSection}>
-          <Text style={styles.sectionTitle}>Body Shape</Text>
+          <Text style={styles.sectionTitle}>{t('studio.bodyShape')}</Text>
           <View style={styles.shapeGrid}>
             {BODY_SHAPES.map((s) => (
               <Pressable
@@ -420,7 +411,7 @@ export default function StudioScreen() {
                 style={[styles.shapeCard, ctx.bodyShape === s.id && styles.shapeCardActive]}
                 onPress={() => ctx.setBodyShape(s.id)}>
                 <BodyShapePreview shape={s.id} active={ctx.bodyShape === s.id} />
-                <Text style={[styles.shapeName, ctx.bodyShape === s.id && { color: DS.primary }]}>{s.label}</Text>
+                <Text style={[styles.shapeName, ctx.bodyShape === s.id && { color: ds.primary }]}>{t(`studio.shapes.${s.id}`)}</Text>
               </Pressable>
             ))}
           </View>
@@ -431,7 +422,7 @@ export default function StudioScreen() {
       {activeTab === 'eyes' && (
         <View style={styles.tabSection}>
           {/* Eye Frame Shape */}
-          <Text style={styles.sectionTitle}>Eye Frame Shape</Text>
+          <Text style={styles.sectionTitle}>{t('studio.eyeFrameShape')}</Text>
           <View style={styles.shapeGrid}>
             {EYE_FRAME_SHAPES.map((s) => (
               <Pressable
@@ -439,13 +430,13 @@ export default function StudioScreen() {
                 style={[styles.shapeCard, ctx.eyeFrameShape === s.id && styles.shapeCardActive]}
                 onPress={() => ctx.setEyeFrameShape(s.id)}>
                 <EyeFramePreview shape={s.id} active={ctx.eyeFrameShape === s.id} />
-                <Text style={[styles.shapeName, ctx.eyeFrameShape === s.id && { color: DS.primary }]}>{s.label}</Text>
+                <Text style={[styles.shapeName, ctx.eyeFrameShape === s.id && { color: ds.primary }]}>{t(`studio.shapes.${s.id}`)}</Text>
               </Pressable>
             ))}
           </View>
 
           {/* Eye Ball Shape */}
-          <Text style={styles.sectionTitle}>Eye Ball Shape</Text>
+          <Text style={styles.sectionTitle}>{t('studio.eyeBallShape')}</Text>
           <View style={styles.shapeGrid}>
             {EYE_BALL_SHAPES.map((s) => (
               <Pressable
@@ -453,14 +444,14 @@ export default function StudioScreen() {
                 style={[styles.shapeCard, ctx.eyeBallShape === s.id && styles.shapeCardActive]}
                 onPress={() => ctx.setEyeBallShape(s.id)}>
                 <EyeBallPreview shape={s.id} active={ctx.eyeBallShape === s.id} />
-                <Text style={[styles.shapeName, ctx.eyeBallShape === s.id && { color: DS.primary }]}>{s.label}</Text>
+                <Text style={[styles.shapeName, ctx.eyeBallShape === s.id && { color: ds.primary }]}>{t(`studio.shapes.${s.id}`)}</Text>
               </Pressable>
             ))}
           </View>
 
           {/* Eye Colors */}
-          <ColorPicker icon="center-focus-strong" title="Eye Frame Color" colors={EYE_COLORS} selected={ctx.eyeFrameColor} onSelect={ctx.setEyeFrameColor} />
-          <ColorPicker icon="lens" title="Eye Ball Color" colors={EYE_COLORS} selected={ctx.eyeBallColor} onSelect={ctx.setEyeBallColor} />
+          <ColorPicker icon="center-focus-strong" title={t('studio.eyeFrameColor')} colors={EYE_COLORS} selected={ctx.eyeFrameColor} onSelect={ctx.setEyeFrameColor} />
+          <ColorPicker icon="lens" title={t('studio.eyeBallColor')} colors={EYE_COLORS} selected={ctx.eyeBallColor} onSelect={ctx.setEyeBallColor} />
         </View>
       )}
 
@@ -468,16 +459,16 @@ export default function StudioScreen() {
       {activeTab === 'logo' && (
         <View style={styles.tabSection}>
           {/* --- Built-in Brand Logos --- */}
-          <Text style={styles.sectionTitle}>Built-in Logos</Text>
+          <Text style={styles.sectionTitle}>{t('studio.builtInLogos')}</Text>
           <View style={styles.logoGrid}>
             {/* "None" tile */}
             <Pressable
               style={[styles.logoTile, !ctx.builtInLogoId && styles.logoTileActive]}
               onPress={() => ctx.setBuiltInLogoId(null)}>
               <View style={styles.logoTileBox}>
-                <MaterialIcons name="block" size={22} color={DS.onSurfaceVariant} />
+                <MaterialIcons name="block" size={22} color={ds.onSurfaceVariant} />
               </View>
-              <Text style={styles.logoTileLabel}>None</Text>
+              <Text style={styles.logoTileLabel}>{t('common.none')}</Text>
             </Pressable>
 
             {BUILTIN_LOGOS.map((logo) => {
@@ -501,47 +492,42 @@ export default function StudioScreen() {
           </View>
 
           {/* --- Upload Custom Logo --- */}
-          <Text style={styles.sectionTitle}>Upload Custom</Text>
+          <Text style={styles.sectionTitle}>{t('studio.uploadCustom')}</Text>
           {ctx.logoUri ? (
             <View style={styles.logoSection}>
               <Image source={{ uri: ctx.logoUri }} style={styles.logoPreview} />
               <View style={styles.logoActions}>
                 <Pressable style={styles.logoBtn} onPress={pickLogo}>
-                  <MaterialIcons name="swap-horiz" size={20} color={DS.primary} />
-                  <Text style={[styles.logoBtnText, { color: DS.primary }]}>Change</Text>
+                  <MaterialIcons name="swap-horiz" size={20} color={ds.primary} />
+                  <Text style={[styles.logoBtnText, { color: ds.primary }]}>{t('common.change')}</Text>
                 </Pressable>
-                <Pressable style={[styles.logoBtn, { backgroundColor: `${DS.errorContainer}44` }]} onPress={() => ctx.setLogoUri(null)}>
-                  <MaterialIcons name="delete-outline" size={20} color={DS.error} />
-                  <Text style={[styles.logoBtnText, { color: DS.error }]}>Remove</Text>
+                <Pressable style={[styles.logoBtn, { backgroundColor: `${ds.errorContainer}44` }]} onPress={() => ctx.setLogoUri(null)}>
+                  <MaterialIcons name="delete-outline" size={20} color={ds.error} />
+                  <Text style={[styles.logoBtnText, { color: ds.error }]}>{t('common.remove')}</Text>
                 </Pressable>
               </View>
             </View>
           ) : (
             <Pressable style={styles.uploadCustomBtn} onPress={pickLogo}>
-              <MaterialIcons name="cloud-upload" size={22} color={DS.secondary} />
-              <Text style={styles.uploadCustomText}>Pick Image from Gallery</Text>
+              <MaterialIcons name="cloud-upload" size={22} color={ds.secondary} />
+              <Text style={styles.uploadCustomText}>{t('studio.pickGallery')}</Text>
             </Pressable>
           )}
 
-          <Text style={styles.hintText}>
-            Logo is centered on the QR code. Error correction is bumped to High to keep the code scannable.
-          </Text>
+          <Text style={styles.hintText}>{t('studio.logoHint')}</Text>
 
           {/* --- Center Text --- */}
-          <Text style={styles.sectionTitle}>Center Text</Text>
-          <Text style={styles.subLabel}>
-            Show a short label in the center instead of a logo (max 6 characters).
-          </Text>
+          <Text style={styles.sectionTitle}>{t('studio.centerText')}</Text>
+          <Text style={styles.subLabel}>{t('studio.centerTextHint')}</Text>
           <View style={styles.textInputRow}>
             <TextInput
               style={styles.textInput}
-              placeholder="e.g. SALE, 2024"
-              placeholderTextColor={DS.outline}
+              placeholder={t('studio.centerTextPlaceholder')}
+              placeholderTextColor={ds.outline}
               value={ctx.centerText}
-              onChangeText={(t) => {
-                ctx.setCenterText(t.slice(0, 6));
-                // Picking center text clears logos for clarity
-                if (t.length > 0) {
+              onChangeText={(v) => {
+                ctx.setCenterText(v.slice(0, 6));
+                if (v.length > 0) {
                   if (ctx.builtInLogoId) ctx.setBuiltInLogoId(null);
                   if (ctx.logoUri) ctx.setLogoUri(null);
                 }
@@ -551,28 +537,26 @@ export default function StudioScreen() {
             />
             {ctx.centerText.length > 0 && (
               <Pressable onPress={() => ctx.setCenterText('')} style={styles.textClearBtn}>
-                <MaterialIcons name="close" size={18} color={DS.onSurfaceVariant} />
+                <MaterialIcons name="close" size={18} color={ds.onSurfaceVariant} />
               </Pressable>
             )}
           </View>
 
           {/* --- Caption (below QR) --- */}
-          <Text style={styles.sectionTitle}>Caption Below QR</Text>
-          <Text style={styles.subLabel}>
-            Add a tagline or description that appears below the QR code in exports.
-          </Text>
+          <Text style={styles.sectionTitle}>{t('studio.captionBelowQR')}</Text>
+          <Text style={styles.subLabel}>{t('studio.captionHint')}</Text>
           <View style={styles.textInputRow}>
             <TextInput
               style={styles.textInput}
-              placeholder="e.g. Scan me!"
-              placeholderTextColor={DS.outline}
+              placeholder={t('studio.captionPlaceholder')}
+              placeholderTextColor={ds.outline}
               value={ctx.captionText}
-              onChangeText={(t) => ctx.setCaptionText(t.slice(0, 40))}
+              onChangeText={(v) => ctx.setCaptionText(v.slice(0, 40))}
               maxLength={40}
             />
             {ctx.captionText.length > 0 && (
               <Pressable onPress={() => ctx.setCaptionText('')} style={styles.textClearBtn}>
-                <MaterialIcons name="close" size={18} color={DS.onSurfaceVariant} />
+                <MaterialIcons name="close" size={18} color={ds.onSurfaceVariant} />
               </Pressable>
             )}
           </View>
@@ -581,8 +565,8 @@ export default function StudioScreen() {
 
       {/* Export Button */}
       <Pressable style={styles.exportBtn} onPress={() => router.push('/export')}>
-        <MaterialIcons name="download" size={20} color={DS.onPrimary} />
-        <Text style={styles.exportBtnText}>Export Design</Text>
+        <MaterialIcons name="download" size={20} color={ds.onPrimary} />
+        <Text style={styles.exportBtnText}>{t('studio.export')}</Text>
       </Pressable>
     </ScrollView>
   );
@@ -593,11 +577,13 @@ function ColorPicker({ icon, title, colors, selected, onSelect }: {
   icon: keyof typeof MaterialIcons.glyphMap; title: string;
   colors: string[]; selected: string; onSelect: (c: string) => void;
 }) {
+  const ds = useDS();
+  const styles = useMemo(() => createStyles(ds), [ds]);
   return (
     <View style={styles.colorGroup}>
       <View style={styles.colorHeader}>
         <View style={styles.colorIcon}>
-          <MaterialIcons name={icon} size={14} color={DS.onSurface} />
+          <MaterialIcons name={icon} size={14} color={ds.onSurface} />
         </View>
         <Text style={styles.colorTitle}>{title}</Text>
         <View style={[styles.colorDot, { backgroundColor: selected }]} />
@@ -613,8 +599,8 @@ function ColorPicker({ icon, title, colors, selected, onSelect }: {
 }
 
 // --- Styles ---
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: DS.surface },
+function createStyles(ds: DSPalette) { return StyleSheet.create({
+  container: { flex: 1, backgroundColor: ds.surface },
   content: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 32, gap: 16 },
 
   previewCard: { alignItems: 'center', gap: 8 },
@@ -622,90 +608,90 @@ const styles = StyleSheet.create({
   qrCanvas: { padding: 10, borderRadius: 10 },
   liveBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: DS.surfaceContainerHighest, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999,
+    backgroundColor: ds.surfaceContainerHighest, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999,
   },
-  liveDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: DS.secondaryFixedDim },
-  liveText: { fontSize: 9, fontWeight: '700', color: DS.onSurface, letterSpacing: 0.5, textTransform: 'uppercase' },
+  liveDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: ds.secondaryFixedDim },
+  liveText: { fontSize: 9, fontWeight: '700', color: ds.onSurface, letterSpacing: 0.5, textTransform: 'uppercase' },
 
-  tabBar: { flexDirection: 'row', backgroundColor: DS.surfaceContainerLow, borderRadius: 12, padding: 3 },
+  tabBar: { flexDirection: 'row', backgroundColor: ds.surfaceContainerLow, borderRadius: 12, padding: 3 },
   tabItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, paddingVertical: 9, borderRadius: 10 },
-  tabItemActive: { backgroundColor: DS.surfaceContainerHigh },
-  tabLabel: { fontSize: 11, fontWeight: '700', color: DS.onSurfaceVariant },
-  tabLabelActive: { color: DS.primary },
+  tabItemActive: { backgroundColor: ds.surfaceContainerHigh },
+  tabLabel: { fontSize: 11, fontWeight: '700', color: ds.onSurfaceVariant },
+  tabLabelActive: { color: ds.primary },
 
   tabSection: { gap: 16 },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: DS.onSurface },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: ds.onSurface },
 
   // Colors
-  colorGroup: { gap: 8, backgroundColor: DS.surfaceContainerLow, borderRadius: 12, padding: 12 },
+  colorGroup: { gap: 8, backgroundColor: ds.surfaceContainerLow, borderRadius: 12, padding: 12 },
   colorHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  colorIcon: { width: 26, height: 26, borderRadius: 7, backgroundColor: DS.surfaceContainerLowest, alignItems: 'center', justifyContent: 'center' },
-  colorTitle: { fontSize: 13, fontWeight: '700', color: DS.onSurface, flex: 1 },
-  colorDot: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: `${DS.outlineVariant}55` },
+  colorIcon: { width: 26, height: 26, borderRadius: 7, backgroundColor: ds.surfaceContainerLowest, alignItems: 'center', justifyContent: 'center' },
+  colorTitle: { fontSize: 13, fontWeight: '700', color: ds.onSurface, flex: 1 },
+  colorDot: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: `${ds.outlineVariant}55` },
   swatchRow: { flexDirection: 'row', gap: 7, flexWrap: 'wrap' },
   swatch: { width: 30, height: 30, borderRadius: 15, borderWidth: 2.5, borderColor: 'transparent' },
   swatchSm: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: 'transparent' },
-  swatchActive: { borderColor: DS.secondaryFixedDim },
+  swatchActive: { borderColor: ds.secondaryFixedDim },
 
   matchColorsBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 12, borderRadius: 10,
-    backgroundColor: DS.surfaceContainerLow,
-    borderWidth: 1, borderColor: `${DS.secondary}33`, borderStyle: 'dashed',
+    backgroundColor: ds.surfaceContainerLow,
+    borderWidth: 1, borderColor: `${ds.secondary}33`, borderStyle: 'dashed',
   },
-  matchColorsText: { fontSize: 13, fontWeight: '700', color: DS.secondary },
+  matchColorsText: { fontSize: 13, fontWeight: '700', color: ds.secondary },
 
   // Gradient
-  gradientSection: { gap: 12, backgroundColor: DS.surfaceContainerLow, borderRadius: 12, padding: 12 },
+  gradientSection: { gap: 12, backgroundColor: ds.surfaceContainerLow, borderRadius: 12, padding: 12 },
   gradientHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  gradientTitle: { fontSize: 13, fontWeight: '700', color: DS.onSurface, flex: 1 },
+  gradientTitle: { fontSize: 13, fontWeight: '700', color: ds.onSurface, flex: 1 },
   gradientColors: { gap: 10 },
   gradientColorCol: { gap: 6 },
-  gradientLabel: { fontSize: 11, fontWeight: '600', color: DS.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.5 },
+  gradientLabel: { fontSize: 11, fontWeight: '600', color: ds.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.5 },
   angleRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
-  anglePill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: DS.surfaceContainerHigh },
-  anglePillActive: { backgroundColor: DS.primaryContainer },
-  angleText: { fontSize: 12, fontWeight: '600', color: DS.onSurfaceVariant },
-  angleTextActive: { color: DS.primary },
+  anglePill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: ds.surfaceContainerHigh },
+  anglePillActive: { backgroundColor: ds.primaryContainer },
+  angleText: { fontSize: 12, fontWeight: '600', color: ds.onSurfaceVariant },
+  angleTextActive: { color: ds.primary },
 
   // BG Image
   bgImagePreview: {
     width: '100%', height: 120, borderRadius: 10,
-    backgroundColor: DS.surfaceContainerHigh,
+    backgroundColor: ds.surfaceContainerHigh,
   },
   bgImageActions: { flexDirection: 'row', gap: 10 },
   bgImageBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
-    backgroundColor: DS.surfaceContainerHigh,
+    backgroundColor: ds.surfaceContainerHigh,
   },
-  bgImageBtnText: { fontSize: 12, fontWeight: '600', color: DS.primary },
+  bgImageBtnText: { fontSize: 12, fontWeight: '600', color: ds.primary },
   bgImageUploadBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 16, borderRadius: 10,
-    backgroundColor: DS.surfaceContainerHigh,
-    borderWidth: 1.5, borderColor: `${DS.secondary}55`, borderStyle: 'dashed',
+    backgroundColor: ds.surfaceContainerHigh,
+    borderWidth: 1.5, borderColor: `${ds.secondary}55`, borderStyle: 'dashed',
   },
-  bgImageUploadText: { fontSize: 13, fontWeight: '700', color: DS.secondary },
-  bgImageHint: { fontSize: 11, color: DS.onSurfaceVariant, lineHeight: 16, fontStyle: 'italic' },
+  bgImageUploadText: { fontSize: 13, fontWeight: '700', color: ds.secondary },
+  bgImageHint: { fontSize: 11, color: ds.onSurfaceVariant, lineHeight: 16, fontStyle: 'italic' },
 
   // Shapes
   shapeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   shapeCard: {
     width: '30%', aspectRatio: 0.9,
-    backgroundColor: DS.surfaceContainerLow, borderRadius: 12,
+    backgroundColor: ds.surfaceContainerLow, borderRadius: 12,
     alignItems: 'center', justifyContent: 'center', gap: 6, padding: 8,
   },
-  shapeCardActive: { borderWidth: 2, borderColor: DS.primary, backgroundColor: `${DS.primaryContainer}18` },
-  shapeName: { fontSize: 10, fontWeight: '700', color: DS.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.3 },
+  shapeCardActive: { borderWidth: 2, borderColor: ds.primary, backgroundColor: `${ds.primaryContainer}18` },
+  shapeName: { fontSize: 10, fontWeight: '700', color: ds.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.3 },
 
-  hintText: { fontSize: 12, color: DS.onSurfaceVariant, lineHeight: 18, textAlign: 'center' },
+  hintText: { fontSize: 12, color: ds.onSurfaceVariant, lineHeight: 18, textAlign: 'center' },
 
   // Logo
   logoSection: { alignItems: 'center', gap: 14 },
-  logoPreview: { width: 80, height: 80, borderRadius: 12, backgroundColor: DS.surfaceContainerHigh },
+  logoPreview: { width: 80, height: 80, borderRadius: 12, backgroundColor: ds.surfaceContainerHigh },
   logoActions: { flexDirection: 'row', gap: 12 },
-  logoBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 10, backgroundColor: DS.surfaceContainerHigh },
+  logoBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 10, backgroundColor: ds.surfaceContainerHigh },
   logoBtnText: { fontSize: 13, fontWeight: '600' },
 
   // Built-in logo grid
@@ -713,31 +699,31 @@ const styles = StyleSheet.create({
   logoTile: {
     width: '22%', alignItems: 'center', gap: 5,
     paddingVertical: 10, borderRadius: 10,
-    backgroundColor: DS.surfaceContainerLow,
+    backgroundColor: ds.surfaceContainerLow,
     borderWidth: 1.5, borderColor: 'transparent',
   },
-  logoTileActive: { borderColor: DS.primary, backgroundColor: `${DS.primaryContainer}22` },
+  logoTileActive: { borderColor: ds.primary, backgroundColor: `${ds.primaryContainer}22` },
   logoTileBox: {
     width: 40, height: 40, borderRadius: 8,
     backgroundColor: '#ffffff',
     alignItems: 'center', justifyContent: 'center',
   },
-  logoTileLabel: { fontSize: 9, fontWeight: '600', color: DS.onSurfaceVariant, textAlign: 'center' },
+  logoTileLabel: { fontSize: 9, fontWeight: '600', color: ds.onSurfaceVariant, textAlign: 'center' },
   uploadCustomBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     paddingVertical: 14, borderRadius: 12,
-    backgroundColor: DS.surfaceContainerHigh,
-    borderWidth: 1.5, borderColor: `${DS.secondary}44`, borderStyle: 'dashed',
+    backgroundColor: ds.surfaceContainerHigh,
+    borderWidth: 1.5, borderColor: `${ds.secondary}44`, borderStyle: 'dashed',
   },
-  uploadCustomText: { fontSize: 14, fontWeight: '700', color: DS.secondary },
+  uploadCustomText: { fontSize: 14, fontWeight: '700', color: ds.secondary },
 
   // Text inputs (center text + caption)
-  subLabel: { fontSize: 12, color: DS.onSurfaceVariant, lineHeight: 17 },
+  subLabel: { fontSize: 12, color: ds.onSurfaceVariant, lineHeight: 17 },
   textInputRow: { position: 'relative', flexDirection: 'row', alignItems: 'center' },
   textInput: {
-    flex: 1, backgroundColor: DS.surfaceContainerHighest, borderRadius: 12,
+    flex: 1, backgroundColor: ds.surfaceContainerHighest, borderRadius: 12,
     paddingHorizontal: 16, paddingVertical: 14, paddingRight: 40,
-    color: DS.onSurface, fontSize: 15,
+    color: ds.onSurface, fontSize: 15,
   },
   textClearBtn: { position: 'absolute', right: 10, padding: 6 },
 
@@ -747,12 +733,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   uploadBox: { borderRadius: 18, padding: 24, alignItems: 'center', gap: 8 },
-  uploadIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: DS.surfaceContainerHighest, alignItems: 'center', justifyContent: 'center' },
-  uploadTitle: { fontSize: 15, fontWeight: '700', color: DS.onSurface },
-  uploadDesc: { fontSize: 12, color: DS.onSurfaceVariant },
-  selectFileBtn: { width: '100%', backgroundColor: DS.surfaceContainerHighest, paddingVertical: 13, borderRadius: 12, alignItems: 'center', marginTop: 4 },
-  selectFileText: { color: DS.secondary, fontWeight: '700', fontSize: 14 },
+  uploadIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: ds.surfaceContainerHighest, alignItems: 'center', justifyContent: 'center' },
+  uploadTitle: { fontSize: 15, fontWeight: '700', color: ds.onSurface },
+  uploadDesc: { fontSize: 12, color: ds.onSurfaceVariant },
+  selectFileBtn: { width: '100%', backgroundColor: ds.surfaceContainerHighest, paddingVertical: 13, borderRadius: 12, alignItems: 'center', marginTop: 4 },
+  selectFileText: { color: ds.secondary, fontWeight: '700', fontSize: 14 },
 
-  exportBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: DS.primary, paddingVertical: 16, borderRadius: 12 },
-  exportBtnText: { color: DS.onPrimary, fontWeight: '800', fontSize: 15 },
-});
+  exportBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: ds.primary, paddingVertical: 16, borderRadius: 12 },
+  exportBtnText: { color: ds.onPrimary, fontWeight: '800', fontSize: 15 },
+}); }

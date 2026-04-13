@@ -10,7 +10,9 @@
       "Bash(ls node_modules/expo-camera/build/ExpoCamera*)",
       "Bash(npm ci:*)",
       "Bash(npm view:*)",
-      "Bash(npm --version)"
+      "Bash(npm --version)",
+      "Bash(grep -v \"Try \\\\`npm i\")",
+      "Bash(grep -v \"Try \\\\`npm\")"
     ]
   }
 }

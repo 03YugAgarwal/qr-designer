@@ -1,81 +1,92 @@
-import { DarkTheme, ThemeProvider } from '@react-navigation/native';
-import React from 'react';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavThemeProvider } from '@react-navigation/native';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import AppTabs from '@/components/app-tabs';
 import { QRDesignProvider } from '@/context/qr-design-context';
-import { DS } from '@/constants/theme';
-
-const customDarkTheme = {
-  ...DarkTheme,
-  colors: {
-    ...DarkTheme.colors,
-    background: DS.surface,
-    card: DS.surface,
-    text: DS.onSurface,
-    border: 'transparent',
-    primary: DS.primary,
-  },
-};
+import { AppThemeProvider, useAppTheme, type DSPalette } from '@/theme/theme-provider';
+import { I18nProvider, useT } from '@/i18n';
 
 function AppHeader() {
+  const t = useT();
+  const { ds } = useAppTheme();
+  const styles = useMemo(() => headerStyles(ds), [ds]);
   return (
     <View style={styles.header}>
       <View style={styles.headerLeft}>
         <View style={styles.headerIconBox}>
-          <MaterialIcons name="qr-code-2" size={20} color={DS.primary} />
+          <MaterialIcons name="qr-code-2" size={20} color={ds.primary} />
         </View>
-        <Text style={styles.headerTitle}>Designer QR</Text>
+        <Text style={styles.headerTitle}>{t('app.title')}</Text>
       </View>
     </View>
+  );
+}
+
+function ThemedShell() {
+  const { resolved, ds } = useAppTheme();
+  const navTheme = useMemo(() => ({
+    ...(resolved === 'light' ? DefaultTheme : DarkTheme),
+    colors: {
+      ...(resolved === 'light' ? DefaultTheme.colors : DarkTheme.colors),
+      background: ds.surface,
+      card: ds.surface,
+      text: ds.onSurface,
+      border: 'transparent',
+      primary: ds.primary,
+    },
+  }), [resolved, ds]);
+
+  const styles = useMemo(() => shellStyles(ds), [ds]);
+
+  return (
+    <NavThemeProvider value={navTheme}>
+      <StatusBar
+        barStyle={resolved === 'light' ? 'dark-content' : 'light-content'}
+        backgroundColor={ds.surface}
+      />
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <AppHeader />
+        <AppTabs />
+      </SafeAreaView>
+    </NavThemeProvider>
   );
 }
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <QRDesignProvider>
-        <ThemeProvider value={customDarkTheme}>
-          <StatusBar barStyle="light-content" backgroundColor={DS.surface} />
-          <SafeAreaView style={styles.container} edges={['top']}>
-            <AppHeader />
-            <AppTabs />
-          </SafeAreaView>
-        </ThemeProvider>
-      </QRDesignProvider>
+      <AppThemeProvider>
+        <I18nProvider>
+          <QRDesignProvider>
+            <ThemedShell />
+          </QRDesignProvider>
+        </I18nProvider>
+      </AppThemeProvider>
     </SafeAreaProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: DS.surface,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: DS.surface,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  headerIconBox: {
-    backgroundColor: DS.primaryContainer,
-    padding: 6,
-    borderRadius: 10,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: DS.primary,
-    letterSpacing: -0.5,
-  },
-});
+function shellStyles(ds: DSPalette) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: ds.surface },
+  });
+}
+
+function headerStyles(ds: DSPalette) {
+  return StyleSheet.create({
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      backgroundColor: ds.surface,
+    },
+    headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    headerIconBox: { backgroundColor: ds.primaryContainer, padding: 6, borderRadius: 10 },
+    headerTitle: { fontSize: 18, fontWeight: '900', color: ds.primary, letterSpacing: -0.5 },
+  });
+}

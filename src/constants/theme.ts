@@ -1,9 +1,23 @@
 import '@/global.css';
 import { Platform } from 'react-native';
 
-// Indigo Prism Design System
-export const DS = {
-  // Surface hierarchy
+// Indigo Prism Design System — DARK
+export interface DSPalette {
+  surface: string; surfaceDim: string; surfaceBright: string;
+  surfaceContainerLowest: string; surfaceContainerLow: string; surfaceContainer: string;
+  surfaceContainerHigh: string; surfaceContainerHighest: string; surfaceVariant: string;
+  primary: string; primaryContainer: string; onPrimary: string; onPrimaryContainer: string;
+  primaryFixed: string; primaryFixedDim: string;
+  secondary: string; secondaryContainer: string; secondaryFixedDim: string;
+  onSecondary: string; onSecondaryContainer: string;
+  tertiary: string; tertiaryContainer: string; onTertiary: string;
+  error: string; errorContainer: string;
+  onSurface: string; onSurfaceVariant: string; onBackground: string; background: string;
+  outline: string; outlineVariant: string;
+  inverseSurface: string; inverseOnSurface: string; inversePrimary: string;
+}
+
+export const DS_DARK: DSPalette = {
   surface: '#121416',
   surfaceDim: '#121416',
   surfaceBright: '#37393b',
@@ -14,7 +28,6 @@ export const DS = {
   surfaceContainerHighest: '#333537',
   surfaceVariant: '#333537',
 
-  // Primary
   primary: '#bbc3ff',
   primaryContainer: '#2243ea',
   onPrimary: '#001d93',
@@ -22,37 +35,81 @@ export const DS = {
   primaryFixed: '#dee0ff',
   primaryFixedDim: '#bbc3ff',
 
-  // Secondary
   secondary: '#bdf4ff',
   secondaryContainer: '#00e3fd',
   secondaryFixedDim: '#00daf3',
   onSecondary: '#00363d',
   onSecondaryContainer: '#00616d',
 
-  // Tertiary
   tertiary: '#cdbdff',
   tertiaryContainer: '#642de6',
   onTertiary: '#370096',
 
-  // Error
   error: '#ffb4ab',
   errorContainer: '#93000a',
 
-  // On-surface
   onSurface: '#e2e2e5',
   onSurfaceVariant: '#c5c5d4',
   onBackground: '#e2e2e5',
   background: '#121416',
 
-  // Outline
   outline: '#8f909e',
   outlineVariant: '#454652',
 
-  // Inverse
   inverseSurface: '#e2e2e5',
   inverseOnSurface: '#2f3133',
   inversePrimary: '#2848ee',
+};
+
+// Indigo Prism Design System — LIGHT
+export const DS_LIGHT: DSPalette = {
+  surface: '#fbf8fd',
+  surfaceDim: '#dbd9dc',
+  surfaceBright: '#fbf8fd',
+  surfaceContainerLowest: '#ffffff',
+  surfaceContainerLow: '#f5f2f7',
+  surfaceContainer: '#efedf1',
+  surfaceContainerHigh: '#e9e7eb',
+  surfaceContainerHighest: '#e3e1e5',
+  surfaceVariant: '#e3e1ec',
+
+  primary: '#2848ee',
+  primaryContainer: '#dee0ff',
+  onPrimary: '#ffffff',
+  onPrimaryContainer: '#00115a',
+  primaryFixed: '#dee0ff',
+  primaryFixedDim: '#bbc3ff',
+
+  secondary: '#006874',
+  secondaryContainer: '#9eeffd',
+  secondaryFixedDim: '#00daf3',
+  onSecondary: '#ffffff',
+  onSecondaryContainer: '#001f24',
+
+  tertiary: '#5b36d6',
+  tertiaryContainer: '#e7deff',
+  onTertiary: '#ffffff',
+
+  error: '#ba1a1a',
+  errorContainer: '#ffdad6',
+
+  onSurface: '#1c1b1f',
+  onSurfaceVariant: '#46464f',
+  onBackground: '#1c1b1f',
+  background: '#fbf8fd',
+
+  outline: '#777680',
+  outlineVariant: '#c7c5d0',
+
+  inverseSurface: '#313033',
+  inverseOnSurface: '#f3eff4',
+  inversePrimary: '#bbc3ff',
 } as const;
+
+// Backward-compatible static export. Existing screens' StyleSheet.create() uses
+// this at module load time, so the app defaults to dark. New code that needs
+// reactive theming should import `useDS` from '@/theme/theme-provider'.
+export const DS = DS_DARK;
 
 export const Colors = {
   light: {
