@@ -1,8 +1,9 @@
 import { DarkTheme, DefaultTheme, ThemeProvider as NavThemeProvider } from '@react-navigation/native';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import mobileAds from 'react-native-google-mobile-ads';
 
 import AppTabs from '@/components/app-tabs';
 import { QRDesignProvider } from '@/context/qr-design-context';
@@ -19,7 +20,7 @@ function AppHeader() {
         <View style={styles.headerIconBox}>
           <MaterialIcons name="qr-code-2" size={20} color={ds.primary} />
         </View>
-        <Text style={styles.headerTitle}>{t('app.title')}</Text>
+        <Text style={styles.headerTitle} numberOfLines={1}>{t('app.name')}</Text>
       </View>
     </View>
   );
@@ -56,6 +57,9 @@ function ThemedShell() {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    mobileAds().initialize().catch(() => {});
+  }, []);
   return (
     <SafeAreaProvider>
       <AppThemeProvider>

@@ -556,7 +556,7 @@ export default function ScanScreen() {
 
       {/* History button */}
       <Pressable style={styles.historyFab} onPress={() => setHistoryOpen(true)} hitSlop={8}>
-        <MaterialIcons name="history" size={22} color={ds.onSurface} />
+        <MaterialIcons name="history" size={22} color="#fff" />
         {scanHistory.length > 0 && (
           <View style={styles.historyBadge}>
             <Text style={styles.historyBadgeText}>{scanHistory.length > 99 ? '99+' : scanHistory.length}</Text>

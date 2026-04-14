@@ -5,6 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { DS } from '@/constants/theme';
 import { useT } from '@/i18n';
 import { useDS, type DSPalette } from '@/theme/theme-provider';
+import BannerAd from '@/components/banner-ad';
 
 const TAB_ITEMS = [
   { name: 'index', href: '/', labelKey: 'tabs.home', icon: 'dashboard' },
@@ -20,6 +21,7 @@ export default function AppTabs() {
   return (
     <Tabs>
       <TabSlot style={{ flex: 1 }} />
+      <BannerAd />
       <TabList style={styles.tabBar}>
         {TAB_ITEMS.map((tab) => (
           <TabTrigger key={tab.name} name={tab.name} href={tab.href} asChild>

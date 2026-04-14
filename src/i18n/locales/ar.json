@@ -1,5 +1,5 @@
 {
-  "app": { "title": "مصمم QR" },
+  "app": { "name": "Scanly", "title": "Scanly - ماسح ومولد رمز QR" },
   "tabs": { "home": "الرئيسية", "studio": "الاستوديو", "scan": "مسح", "settings": "الإعدادات" },
   "common": {
     "ok": "موافق", "cancel": "إلغاء", "save": "حفظ", "delete": "حذف",

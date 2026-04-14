@@ -1,5 +1,5 @@
 {
-  "app": { "title": "Designer QR" },
+  "app": { "name": "Scanly", "title": "Scanly - Scanner et Générateur de QR Code" },
   "tabs": { "home": "Accueil", "studio": "Studio", "scan": "Scanner", "settings": "Réglages" },
   "common": {
     "ok": "OK", "cancel": "Annuler", "save": "Enregistrer", "delete": "Supprimer",

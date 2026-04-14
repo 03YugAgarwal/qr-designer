@@ -1,5 +1,5 @@
 {
-  "app": { "title": "设计师二维码" },
+  "app": { "name": "Scanly", "title": "Scanly - 二维码扫描器和生成器" },
   "tabs": { "home": "首页", "studio": "工作室", "scan": "扫描", "settings": "设置" },
   "common": {
     "ok": "确定", "cancel": "取消", "save": "保存", "delete": "删除",

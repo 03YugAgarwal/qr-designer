@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "qr-designer",
+    "name": "Scanly - QR Code Scanner & Generator",
     "slug": "qr-designer",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -45,10 +45,17 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Designer QR to use your camera to scan QR codes."
+          "cameraPermission": "Allow Scanly to use your camera to scan QR codes."
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-2668755144025659~2448149680",
+          "iosAppId": "ca-app-pub-2668755144025659~2448149680"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
