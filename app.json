@@ -48,14 +48,7 @@
           "cameraPermission": "Allow Scanly to use your camera to scan QR codes."
         }
       ],
-      "expo-localization",
-      [
-        "react-native-google-mobile-ads",
-        {
-          "androidAppId": "ca-app-pub-2668755144025659~2448149680",
-          "iosAppId": "ca-app-pub-2668755144025659~2448149680"
-        }
-      ]
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

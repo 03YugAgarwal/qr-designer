@@ -1,11 +1,11 @@
 import { DarkTheme, DefaultTheme, ThemeProvider as NavThemeProvider } from '@react-navigation/native';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import mobileAds from 'react-native-google-mobile-ads';
+import { Stack } from 'expo-router';
+// import mobileAds from 'react-native-google-mobile-ads';
 
-import AppTabs from '@/components/app-tabs';
 import { QRDesignProvider } from '@/context/qr-design-context';
 import { AppThemeProvider, useAppTheme, type DSPalette } from '@/theme/theme-provider';
 import { I18nProvider, useT } from '@/i18n';
@@ -50,16 +50,20 @@ function ThemedShell() {
       />
       <SafeAreaView style={styles.container} edges={['top']}>
         <AppHeader />
-        <AppTabs />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="export" />
+          <Stack.Screen name="create" />
+        </Stack>
       </SafeAreaView>
     </NavThemeProvider>
   );
 }
 
 export default function RootLayout() {
-  useEffect(() => {
-    mobileAds().initialize().catch(() => {});
-  }, []);
+  // useEffect(() => {
+  //   mobileAds().initialize().catch(() => {});
+  // }, []);
   return (
     <SafeAreaProvider>
       <AppThemeProvider>

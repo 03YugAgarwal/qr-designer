@@ -8,13 +8,10 @@ import {
 
 export const BANNER_AD_HEIGHT = 60;
 
-// Replace with real AdMob ad unit IDs when going to production.
-const PROD_UNIT_ID = Platform.select({
-  android: 'ca-app-pub-2668755144025659/6267975195',
-  ios: 'ca-app-pub-2668755144025659/6267975195',
+const adUnitId = Platform.select({
+  android: process.env.EXPO_PUBLIC_ADMOB_BANNER_ANDROID_ID,
+  ios: process.env.EXPO_PUBLIC_ADMOB_BANNER_IOS_ID,
 }) as string;
-
-const adUnitId = PROD_UNIT_ID;
 
 export default function BannerAd() {
   const ds = useDS();

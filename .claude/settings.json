@@ -12,7 +12,15 @@
       "Bash(npm view:*)",
       "Bash(npm --version)",
       "Bash(grep -v \"Try \\\\`npm i\")",
-      "Bash(grep -v \"Try \\\\`npm\")"
+      "Bash(grep -v \"Try \\\\`npm\")",
+      "Bash(grep -r \"privacy\\\\|policy\\\\|terms\\\\|eula\\\\|LICENSE\\\\|author\" /d/Android/qr-designer/*.json /d/Android/qr-designer/*.md)",
+      "Bash(grep -r \"versionCode\\\\|versionName\\\\|version\\\\|buildNumber\\\\|buildName\" /d/Android/qr-designer/*.json /d/Android/qr-designer/android/app/build.gradle)",
+      "Bash(ls -la /d/Android/qr-designer/android/app/*.keystore)",
+      "Bash(ls -lh /d/Android/qr-designer/assets/images/splash* /d/Android/qr-designer/assets/images/android-icon*)",
+      "Bash(find /d/Android/qr-designer/android -name \"gradle.properties\" -exec cat {} \\\\;)",
+      "Bash(xargs cat *)",
+      "Bash(grep -rn \"ext\\\\.compileSdkVersion\\\\|ext\\\\.targetSdk\\\\|ext\\\\.minSdk\" /d/Android/qr-designer/android/*.gradle*)",
+      "Bash(git check-ignore *)"
     ]
   }
 }
