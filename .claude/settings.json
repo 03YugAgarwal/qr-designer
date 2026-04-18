@@ -27,7 +27,17 @@
       "Bash(python -c \"from PIL import Image; print\\('PIL_FOUND'\\)\")",
       "Bash(node -e \"require\\('sharp'\\); console.log\\('SHARP_OK'\\)\")",
       "Bash(npx --yes sharp-cli --input \"assets/images/android-icon-monochrome.png\" --output \"assets/images/android-icon-monochrome.png\" resize 512 512)",
-      "Bash(node -e \"const fs=require\\('fs'\\); const b=fs.readFileSync\\('assets/images/android-icon-monochrome.png'\\); console.log\\(b.readUInt32BE\\(16\\)+'x'+b.readUInt32BE\\(20\\)\\);\")"
+      "Bash(node -e \"const fs=require\\('fs'\\); const b=fs.readFileSync\\('assets/images/android-icon-monochrome.png'\\); console.log\\(b.readUInt32BE\\(16\\)+'x'+b.readUInt32BE\\(20\\)\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); const b=fs.readFileSync\\('assets/images/favicon.png'\\); console.log\\('favicon.png: '+b.readUInt32BE\\(16\\)+'x'+b.readUInt32BE\\(20\\)+' \\('+b.length+' bytes\\)'\\);\")",
+      "Bash(cp assets/images/android-icon-foreground.png assets/images/android-icon-foreground-original.png.bak)",
+      "Bash(npx --yes sharp-cli --input assets/images/android-icon-foreground-original.png.bak --output assets/images/android-icon-foreground.png resize 338 338 -- extend --top 87 --bottom 87 --left 87 --right 87 --background \"{\\\\\"r\\\\\":0,\\\\\"g\\\\\":0,\\\\\"b\\\\\":0,\\\\\"alpha\\\\\":0}\")",
+      "Bash(node scripts/pad-foreground.js)",
+      "Bash(rm -f assets/images/android-icon-foreground-original.png.bak assets/images/android-icon-background.png)",
+      "Bash(rm -rf scripts)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const b=fs.readFileSync\\('assets/images/android-icon-foreground.png'\\); console.log\\(b.readUInt32BE\\(16\\)+'x'+b.readUInt32BE\\(20\\)\\);\")",
+      "Bash(node scripts/rebuild-icons.js)",
+      "Bash(node scripts/verify-icon.js)",
+      "Bash(node -e \"const fs=require\\('fs'\\); ['assets/images/android-icon-foreground.png','assets/images/android-icon-monochrome.png','assets/images/icon.png'].forEach\\(p=>{const b=fs.readFileSync\\(p\\);console.log\\(p+': '+b.readUInt32BE\\(16\\)+'x'+b.readUInt32BE\\(20\\)\\);}\\);\")"
     ]
   }
 }
