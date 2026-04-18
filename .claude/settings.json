@@ -20,7 +20,14 @@
       "Bash(find /d/Android/qr-designer/android -name \"gradle.properties\" -exec cat {} \\\\;)",
       "Bash(xargs cat *)",
       "Bash(grep -rn \"ext\\\\.compileSdkVersion\\\\|ext\\\\.targetSdk\\\\|ext\\\\.minSdk\" /d/Android/qr-designer/android/*.gradle*)",
-      "Bash(git check-ignore *)"
+      "Bash(git check-ignore *)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const f=['assets/images/android-icon-monochrome.png','assets/images/android-icon-foreground.png','assets/images/android-icon-background.png','assets/images/icon.png']; f.forEach\\(p=>{const b=fs.readFileSync\\(p\\);const w=b.readUInt32BE\\(16\\);const h=b.readUInt32BE\\(20\\);console.log\\(p,w+'x'+h\\);}\\);\")",
+      "Bash(ls node_modules/sharp)",
+      "Bash(which magick *)",
+      "Bash(python -c \"from PIL import Image; print\\('PIL_FOUND'\\)\")",
+      "Bash(node -e \"require\\('sharp'\\); console.log\\('SHARP_OK'\\)\")",
+      "Bash(npx --yes sharp-cli --input \"assets/images/android-icon-monochrome.png\" --output \"assets/images/android-icon-monochrome.png\" resize 512 512)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const b=fs.readFileSync\\('assets/images/android-icon-monochrome.png'\\); console.log\\(b.readUInt32BE\\(16\\)+'x'+b.readUInt32BE\\(20\\)\\);\")"
     ]
   }
 }

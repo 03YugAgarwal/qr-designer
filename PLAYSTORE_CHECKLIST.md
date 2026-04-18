@@ -16,14 +16,12 @@
 
 ## Important
 
-- [ ] **Fix adaptive icon monochrome size**
-  - Current: `assets/images/android-icon-monochrome.png` is 432x432
-  - Required: 108x108 for correct adaptive icon rendering
+- [x] **Adaptive icon monochrome size** — resized to 512x512 to match foreground/background
+  - Note: original 432x432 was also valid (xxxhdpi resolution); 512 is just for consistency
 
-- [ ] **Verify AdMob ad unit IDs are production IDs**
-  - `src/components/banner-ad.tsx` (line 11) has a comment saying "Replace with real AdMob ad unit IDs"
-  - Confirm `ca-app-pub-2668755144025659/6267975195` is a production unit, not a test one
-  - Ads are currently commented out, so not blocking release
+- [x] **AdMob IDs confirmed non-test** — publisher `2668755144025659` is a real AdMob account (Google's test publisher is `3940256099942544`)
+  - Still TODO: verify in AdMob console that the App and Ad unit are **Active**
+  - Moved to env vars via `.env` + `app.config.js`; stale comment removed
 
 ## Play Store Console Setup
 

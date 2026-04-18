@@ -1,26 +1,27 @@
 /**
  * Dynamic Expo config — overlays env-driven values on top of app.json.
- * AdMob IDs come from .env (local) or EAS environment variables (cloud builds).
+ * AdMob is gated by EXPO_PUBLIC_ENABLE_ADS so we can ship without the SDK
+ * in the first release and flip it on in a later update.
  */
 module.exports = ({ config }) => {
+  const adsEnabled = process.env.EXPO_PUBLIC_ENABLE_ADS === 'true';
   const androidAppId = process.env.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID;
   const iosAppId = process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID;
 
-  if (!androidAppId || !iosAppId) {
-    throw new Error(
-      'Missing AdMob App IDs. Set EXPO_PUBLIC_ADMOB_ANDROID_APP_ID and ' +
-      'EXPO_PUBLIC_ADMOB_IOS_APP_ID in .env (local) or EAS env (cloud build).'
-    );
-  }
+  const plugins = [...(config.plugins ?? [])];
 
-  return {
-    ...config,
-    plugins: [
-      ...(config.plugins ?? []),
-      [
+  if (adsEnabled) {
+    if (androidAppId && iosAppId) {
+      plugins.push([
         'react-native-google-mobile-ads',
         { androidAppId, iosAppId },
-      ],
-    ],
-  };
+      ]);
+    } else {
+      console.warn(
+        '[app.config.js] EXPO_PUBLIC_ENABLE_ADS=true but AdMob App IDs are missing — skipping plugin.'
+      );
+    }
+  }
+
+  return { ...config, plugins };
 };
