@@ -37,7 +37,11 @@
       "Bash(node -e \"const fs=require\\('fs'\\); const b=fs.readFileSync\\('assets/images/android-icon-foreground.png'\\); console.log\\(b.readUInt32BE\\(16\\)+'x'+b.readUInt32BE\\(20\\)\\);\")",
       "Bash(node scripts/rebuild-icons.js)",
       "Bash(node scripts/verify-icon.js)",
-      "Bash(node -e \"const fs=require\\('fs'\\); ['assets/images/android-icon-foreground.png','assets/images/android-icon-monochrome.png','assets/images/icon.png'].forEach\\(p=>{const b=fs.readFileSync\\(p\\);console.log\\(p+': '+b.readUInt32BE\\(16\\)+'x'+b.readUInt32BE\\(20\\)\\);}\\);\")"
+      "Bash(node -e \"const fs=require\\('fs'\\); ['assets/images/android-icon-foreground.png','assets/images/android-icon-monochrome.png','assets/images/icon.png'].forEach\\(p=>{const b=fs.readFileSync\\(p\\);console.log\\(p+': '+b.readUInt32BE\\(16\\)+'x'+b.readUInt32BE\\(20\\)\\);}\\);\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); const l=require\\('./package-lock.json'\\); console.log\\('package.json worklets:', p.dependencies['react-native-worklets']\\); console.log\\('lock has worklets:', !!l.packages['node_modules/react-native-worklets']\\); console.log\\('node:', process.version\\); console.log\\('npm lockfileVersion:', l.lockfileVersion\\);\")",
+      "Bash(rm -f package-lock.json)",
+      "Bash(rm -rf node_modules)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); const l=require\\('./package-lock.json'\\); console.log\\('pkg worklets:', p.dependencies['react-native-worklets']\\); console.log\\('lock has worklets:', Object.keys\\(l.packages\\).filter\\(k=>k.includes\\('react-native-worklets'\\)\\)\\);\")"
     ]
   }
 }

@@ -8,7 +8,10 @@ module.exports = ({ config }) => {
   const androidAppId = process.env.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID;
   const iosAppId = process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID;
 
-  const plugins = [...(config.plugins ?? [])];
+  const plugins = [
+    ...(config.plugins ?? []),
+    './plugins/with-release-signing',
+  ];
 
   if (androidAppId && iosAppId) {
     plugins.push([
