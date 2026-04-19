@@ -50,11 +50,7 @@ function ThemedShell() {
       />
       <SafeAreaView style={styles.container} edges={['top']}>
         <AppHeader />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="export" />
-          <Stack.Screen name="create" />
-        </Stack>
+        <Stack screenOptions={{ headerShown: false }} />
       </SafeAreaView>
     </NavThemeProvider>
   );
