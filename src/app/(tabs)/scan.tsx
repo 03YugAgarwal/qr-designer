@@ -14,6 +14,8 @@ import {
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useQRDesign, type ScanHistoryEntry } from '@/context/qr-design-context';
 import { useDS, type DSPalette } from '@/theme/theme-provider';
 import { useT } from '@/i18n';
@@ -391,6 +393,7 @@ const BARCODE_TYPES = ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39', '
 export default function ScanScreen() {
   const t = useT();
   const ds = useDS();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(ds), [ds]);
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState<{ type: string; data: string } | null>(null);
@@ -468,6 +471,17 @@ export default function ScanScreen() {
 
   const handleScanAgain = useCallback(() => setScanned(null), []);
 
+  // Reset scan/history state when leaving the tab so the result overlay
+  // doesn't linger when the user comes back.
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setScanned(null);
+        setHistoryOpen(false);
+      };
+    }, [])
+  );
+
   const handleHistoryItemPress = useCallback((entry: ScanHistoryEntry) => {
     setHistoryOpen(false);
     setScanned({ data: entry.data, type: entry.type });
@@ -523,7 +537,7 @@ export default function ScanScreen() {
       />
 
       {/* Header */}
-      <View style={styles.headerOverlay}>
+      <View style={[styles.headerOverlay, { top: insets.top + 18 }]}>
         <Text style={styles.headerTitle}>
           {scanMode === 'qr' ? t('scan.title') : t('scan.titleBarcode')}
         </Text>
@@ -555,13 +569,20 @@ export default function ScanScreen() {
       </View>
 
       {/* History button */}
-      <Pressable style={styles.historyFab} onPress={() => setHistoryOpen(true)} hitSlop={8}>
-        <MaterialIcons name="history" size={22} color="#fff" />
-        {scanHistory.length > 0 && (
+      <Pressable
+        style={[styles.historyFabWrap, { top: insets.top + 12, right: insets.right + 20 }]}
+        onPress={() => setHistoryOpen(true)}
+        hitSlop={8}>
+        <View style={styles.historyFab}>
+          <MaterialIcons name="history" size={22} color="#fff" />
+        </View>
+        {scanHistory.length > 9 ? (
+          <View style={styles.historyDot} />
+        ) : scanHistory.length > 0 ? (
           <View style={styles.historyBadge}>
-            <Text style={styles.historyBadgeText}>{scanHistory.length > 99 ? '99+' : scanHistory.length}</Text>
+            <Text style={styles.historyBadgeText}>{scanHistory.length}</Text>
           </View>
-        )}
+        ) : null}
       </Pressable>
 
       {/* Scanning frame */}
@@ -675,8 +696,8 @@ export default function ScanScreen() {
                 <Text style={styles.actionBtnText}>{t('common.copy')}</Text>
               </Pressable>
               <Pressable style={[styles.actionBtn, styles.scanAgainBtn]} onPress={handleScanAgain}>
-                <MaterialIcons name="qr-code-scanner" size={18} color={ds.onPrimary} />
-                <Text style={[styles.actionBtnText, { color: ds.onPrimary }]}>{t('scan.scanAgain')}</Text>
+                <MaterialIcons name="qr-code-scanner" size={18} color={ds.onPrimaryContainer} />
+                <Text style={[styles.actionBtnText, { color: ds.onPrimaryContainer }]}>{t('scan.scanAgain')}</Text>
               </Pressable>
             </View>
           </ScrollView>
@@ -775,7 +796,7 @@ function createStyles(ds: DSPalette) {
   permissionBtn: { backgroundColor: ds.primary, paddingHorizontal: 32, paddingVertical: 14, borderRadius: 12, marginTop: 8 },
   permissionBtnText: { color: ds.onPrimary, fontWeight: '800', fontSize: 15 },
 
-  headerOverlay: { position: 'absolute', top: 30, left: 0, right: 0, alignItems: 'center', gap: 4, paddingHorizontal: 20 },
+  headerOverlay: { position: 'absolute', left: 0, right: 0, alignItems: 'center', gap: 4, paddingHorizontal: 20 },
   headerTitle: { fontSize: 24, fontWeight: '800', color: '#fff', textShadowColor: 'rgba(0,0,0,0.6)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
   headerSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.85)', textShadowColor: 'rgba(0,0,0,0.6)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
 
@@ -856,21 +877,31 @@ function createStyles(ds: DSPalette) {
   actionBtnText: { fontSize: 13, fontWeight: '700', color: ds.primary },
 
   // History FAB
+  historyFabWrap: {
+    position: 'absolute',
+    width: 52, height: 52,
+    alignItems: 'center', justifyContent: 'center',
+  },
   historyFab: {
-    position: 'absolute', top: 24, right: 16,
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: 'rgba(40, 42, 44, 0.85)',
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: `${ds.outlineVariant}55`,
   },
   historyBadge: {
-    position: 'absolute', top: -2, right: -2,
+    position: 'absolute', top: 2, right: 2,
     minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 4,
     backgroundColor: ds.secondaryFixedDim,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 2, borderColor: ds.surface,
   },
   historyBadgeText: { fontSize: 9, fontWeight: '900', color: ds.surface },
+  historyDot: {
+    position: 'absolute', top: 4, right: 4,
+    width: 12, height: 12, borderRadius: 6,
+    backgroundColor: ds.secondaryFixedDim,
+    borderWidth: 2, borderColor: ds.surface,
+  },
 
   // History Panel
   historyOverlay: {

@@ -109,7 +109,7 @@ export default function SettingsScreen() {
         <View style={styles.card}>
           <View style={styles.aboutRow}>
             <Text style={styles.rowTitle}>{t('app.title')}</Text>
-            <Text style={styles.rowDesc}>{t('settings.version')} 1.0.0</Text>
+            <Text style={styles.rowDesc}>{t('settings.version')} 1.0.3</Text>
           </View>
         </View>
       </View>

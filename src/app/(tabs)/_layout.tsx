@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Tabs, TabSlot, TabList, TabTrigger } from 'expo-router/ui';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useT } from '@/i18n';
 import { useDS, type DSPalette } from '@/theme/theme-provider';
 // import BannerAd from '@/components/banner-ad';
@@ -16,12 +17,13 @@ const TAB_ITEMS = [
 export default function TabsLayout() {
   const t = useT();
   const ds = useDS();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(ds), [ds]);
   return (
     <Tabs>
       <TabSlot style={{ flex: 1 }} />
       {/* <BannerAd /> */}
-      <TabList style={styles.tabBar}>
+      <TabList style={[styles.tabBar, { paddingBottom: Math.max(insets.bottom, 12) + 12 }]}>
         {TAB_ITEMS.map((tab) => (
           <TabTrigger key={tab.name} name={tab.name} href={tab.href} asChild>
             <TabButton icon={tab.icon} label={t(tab.labelKey)} ds={ds} />
@@ -70,7 +72,6 @@ function createStyles(ds: DSPalette) {
       alignItems: 'center',
       paddingHorizontal: 16,
       paddingTop: 10,
-      paddingBottom: 24,
       backgroundColor: ds.surfaceContainerLow,
       borderTopLeftRadius: 16,
       borderTopRightRadius: 16,

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Scanly - QR Code Scanner & Generator",
     "slug": "qr-designer",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "qrdesigner",
@@ -21,7 +21,8 @@
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.thevibes.qrdesigner"
+      "package": "com.thevibes.qrdesigner",
+      "versionCode": 4
     },
     "web": {
       "output": "static",

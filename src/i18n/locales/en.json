@@ -44,6 +44,8 @@
     "subtitle": "Design your QR code",
     "export": "Export Design",
     "livePreview": "Live Preview",
+    "editing": "Editing",
+    "noContent": "No content yet — tap to add",
     "tabColors": "Colors",
     "tabBody": "Body",
     "tabEyes": "Eyes",

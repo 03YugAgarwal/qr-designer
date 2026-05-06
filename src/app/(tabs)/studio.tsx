@@ -11,13 +11,13 @@ import {
   Switch,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import Svg, { Rect, Circle, Path } from 'react-native-svg';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import CustomQRCode, { type BodyShape, type EyeFrameShape, type EyeBallShape } from '@/components/custom-qr';
 import { BUILTIN_LOGOS, BrandIcon, LogoOverlay, getLogoById } from '@/components/builtin-logos';
-import { useQRDesign } from '@/context/qr-design-context';
+import { useQRDesign, getContentTypeConfig } from '@/context/qr-design-context';
 import { useDS, type DSPalette } from '@/theme/theme-provider';
 import { useT } from '@/i18n';
 
@@ -187,6 +187,21 @@ export default function StudioScreen() {
   const qrSize = Math.min(screenWidth - 160, 180);
   const qrValue = ctx.getQRValue();
 
+  const contentSummary = useMemo(() => {
+    const cfg = getContentTypeConfig(ctx.contentType);
+    let summary = '';
+    if (ctx.contentType === 'wifi') {
+      const { ssid, encryption } = ctx.wifiData;
+      summary = ssid ? `${ssid} · ${encryption}` : '';
+    } else if (ctx.contentType === 'contact') {
+      const { name, phone, email } = ctx.contactData;
+      summary = name || phone || email || '';
+    } else {
+      summary = ctx.content;
+    }
+    return { cfg, summary };
+  }, [ctx.contentType, ctx.content, ctx.wifiData, ctx.contactData]);
+
   const pickLogo = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -277,6 +292,28 @@ export default function StudioScreen() {
           <Text style={styles.liveText}>{t('studio.livePreview')}</Text>
         </View>
       </View>
+
+      {/* Content summary — what's being encoded */}
+      <Pressable style={styles.contentSummary} onPress={() => router.push('/')}>
+        <View style={[styles.contentSummaryIcon, { backgroundColor: `${contentSummary.cfg.color}22` }]}>
+          {contentSummary.cfg.iconSet === 'fa5b' ? (
+            <FontAwesome5 name={contentSummary.cfg.iconName as any} size={16} color={contentSummary.cfg.color} brand />
+          ) : (
+            <MaterialIcons name={contentSummary.cfg.iconName as any} size={18} color={contentSummary.cfg.color} />
+          )}
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={styles.contentSummaryLabel}>
+            {t('studio.editing')} · {contentSummary.cfg.label}
+          </Text>
+          <Text
+            style={[styles.contentSummaryValue, !contentSummary.summary && styles.contentSummaryEmpty]}
+            numberOfLines={1}>
+            {contentSummary.summary || t('studio.noContent')}
+          </Text>
+        </View>
+        <MaterialIcons name="edit" size={18} color={ds.onSurfaceVariant} />
+      </Pressable>
 
       {/* Tab Bar */}
       <View style={styles.tabBar}>
@@ -612,6 +649,23 @@ function createStyles(ds: DSPalette) { return StyleSheet.create({
   },
   liveDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: ds.secondaryFixedDim },
   liveText: { fontSize: 9, fontWeight: '700', color: ds.onSurface, letterSpacing: 0.5, textTransform: 'uppercase' },
+
+  contentSummary: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: ds.surfaceContainerLow, borderRadius: 12,
+    paddingHorizontal: 12, paddingVertical: 10,
+    borderWidth: 1, borderColor: `${ds.outlineVariant}33`,
+  },
+  contentSummaryIcon: {
+    width: 32, height: 32, borderRadius: 8,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  contentSummaryLabel: {
+    fontSize: 10, fontWeight: '700', color: ds.onSurfaceVariant,
+    textTransform: 'uppercase', letterSpacing: 0.8,
+  },
+  contentSummaryValue: { fontSize: 13, fontWeight: '600', color: ds.onSurface },
+  contentSummaryEmpty: { color: ds.outline, fontStyle: 'italic', fontWeight: '500' },
 
   tabBar: { flexDirection: 'row', backgroundColor: ds.surfaceContainerLow, borderRadius: 12, padding: 3 },
   tabItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, paddingVertical: 9, borderRadius: 10 },
